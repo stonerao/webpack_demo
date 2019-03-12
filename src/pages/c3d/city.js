@@ -125,73 +125,10 @@ class City extends Base {
                 state.initState()
                 state.AnimationFrame()
                 state.dom.addEventListener("mouseup", state.mouseup)
-                state.helper() 
+                state.helper()
+                
             },
-            renderCity(_json) {
-                let _data = _this.cloneJSON(_json)
-                let { features } = _data;
-                let i = 0;
-                while (i < features.length) {
-                    let elem = features[i]
-                    this.createBuilding(elem.geometry.coordinates, [elem.properties.centerx, elem.properties.centery], elem.properties.height)
-                    i += 1;
-                }
-                var light = new THREE.AmbientLight( 0x404040 ); // soft white light
-                state.scene.add( light );
-
-            },
-            createBuilding(vert, center, height) {
-                let arr = []
-                let _arr = []
-                vert.forEach(x => {
-                    _arr.push(...x)
-                })
-                // for (let i = 0; i < _arr.length; i++) {
-                // geometry.vertices.push(new THREE.Vector3(-1, 2, -1)); 
-                let top_arr = []
-                let cp = state.projection(center)
-
-                console.log(cp)
-                for (let x = 0; x < _arr.length - 1; x++) {
-
-                    if (x + 1 < _arr.length) {
-                        let p = state.projection(_arr[x])
-                        top_arr.push(p)
-                        let p1 = state.projection(_arr[x + 1])
-
-                        //一面
-                        arr.push(p[0] - 600, 0, p[1] - 600)
-                        arr.push(p[0] - 600, height, p[1] - 600)
-                        arr.push(p1[0] - 600, 0, p1[1] - 600)
-
-                        arr.push(p[0] - 600, height, p[1] - 600)
-                        arr.push(p1[0] - 600, height, p1[1] - 600)
-                        arr.push(p1[0] - 600, 0, p1[1] - 600)
-
-                        arr.push(p[0] - 600, height, p[1] - 600)
-                        arr.push(cp[0] - 520, height, cp[1] - 620)
-                        arr.push(p1[0] - 600, height, p1[1] - 600)
-
-                    }
-                }
-
-                // } 
-                var geometry = new THREE.BufferGeometry();
-                // 创建一个简单的矩形. 在这里我们左上和右下顶点被复制了两次。
-                // 因为在两个三角面片里，这两个顶点都需要被用到。
-                var vertices = new Float32Array(arr);
-                // itemSize = 3 因为每个顶点都是一个三元组。
-                geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-                var material = new THREE.MeshStandardMaterial({
-                    color: 0xff0000,
-                     combine:12
-                });
-                var mesh = new THREE.Mesh(geometry, material)
-                state.scene.add(mesh);
-
-
-
-            }
+             
         }
     }
 
