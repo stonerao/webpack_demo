@@ -27,7 +27,7 @@ const rules = [{
 		// 不检查node_modules下的js文件
 		// exclude: "/node_modules/"
 	}, {
-		test: /\.(png|jpg|gif)$/,
+		test: /\.(png|jpg|gif|mtl|obj|dae)$/,
 		use: [{
 			// 需要下载file-loader和url-loader
 			loader: "url-loader",

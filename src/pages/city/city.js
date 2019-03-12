@@ -1,6 +1,10 @@
 import geo from '../../json/test.json'
 import * as d3 from 'd3'
 import Base from '../../utils/base'
+/**
+ * @date 2019-03-28
+ * 鹏程金融系统演示
+ */
 let state = {};
 class City extends Base {
     constructor(params) {
@@ -19,6 +23,7 @@ class City extends Base {
             raycaster: new THREE.Raycaster(),
             projection: d3.geoMercator().fitSize([width, height], geo),
             ...this.methods(),
+            resolutio: new THREE.Vector2(window.innerWidth, window.innerHeight)
 
         })
         this.created()
@@ -30,6 +35,15 @@ class City extends Base {
     methods() {
         let _this = this;
         state = _this.state;
+        var materialLinne = new MeshLineMaterial({
+            color: new THREE.Color("#91FFAA"),
+            opacity: 1,
+            resolution: state.resolution,
+            sizeAttenuation: 1,
+            lineWidth: 1,
+            near: 9,
+            far: 100000,
+        });
         return {
             initial() {
                 state.dom = document.getElementById(state.id)
@@ -118,84 +132,83 @@ class City extends Base {
             helper() {
                 let gridHelper = new THREE.GridHelper(1000, 100);
                 state.scene.add(gridHelper);
-                let ambient = new THREE.AmbientLight(0xffffff); // soft white light
-                state.scene.add(ambient);
+             /*    let ambient = new THREE.AmbientLight({
+                    color: 0xffffff,
+                    intensity: 2
+                });
+                state.scene.add(ambient); */
+                 /* var light = new THREE.HemisphereLight({
+                     skyColor: 0xffffff, groundColor: 0x999999, intensity: 0.1
+                 });
+                 state.scene.add(light); 
+                light.position.y=500
+                light.position.x=-200
+                var helper = new THREE.HemisphereLightHelper(light, 5);
+
+                state.scene.add(helper); */
+                /*   var light = new THREE.PointLight(0xffffff, 1, 0);
+                  light.position.set(50, 0, 150);
+                  state.scene.add(light); */
+
+               /*  var spotLight = new THREE.SpotLight({
+                    color: 0xffffff,
+                    intensity: 2,
+                    decay: 1
+                });
+                spotLight.position.set(100, 100, 100);
+
+                spotLight.castShadow = true;
+
+                spotLight.shadow.mapSize.width = 1024;
+                spotLight.shadow.mapSize.height = 1024;
+
+                spotLight.shadow.camera.near = 500;
+                spotLight.shadow.camera.far = 4000;
+                spotLight.shadow.camera.fov = 30;
+
+                state.scene.add(spotLight);
+
+                var spotLightHelper = new THREE.SpotLightHelper(spotLight);
+                state.scene.add(spotLightHelper); */
+
+                var pointLight = new THREE.PointLight(0xffffff, 3, 100);
+                pointLight.position.set(20, 30, 10);
+                state.scene.add(pointLight);
+
+                var sphereSize = 1;
+                var pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
+                state.scene.add(pointLightHelper);
             },
             load() {
                 state.initState()
                 state.AnimationFrame()
                 state.dom.addEventListener("mouseup", state.mouseup)
                 state.helper()
-                state.renderCity(geo)
+
+                state.createCity()
             },
-            renderCity(_json) {
-                let _data = _this.cloneJSON(_json)
-                let { features } = _data;
-                let i = 0;
-
-                /*   while (i < features.length) {
-                      let elem = features[i]
-                      this.createBuilding(elem.geometry.coordinates) 
-                      i+=100;
-                  } */
-                var x = 0, y = 0;
-
-                var heartShape = new THREE.Shape();
-
-                heartShape.moveTo(0, 0);
-                heartShape.bezierCurveTo(10, 10, 10, 10, 0);
-                heartShape.bezierCurveTo(15, 15, 15);
-                heartShape.bezierCurveTo(20, 20, 20);
-                heartShape.bezierCurveTo(30, 30, 30);
-
-                var geometry = new THREE.ShapeGeometry(heartShape);
-                var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-                var mesh = new THREE.Mesh(geometry, material);
-                state.scene.add(mesh);
-
+            createCity() {
+                var mtlLoader = new THREE.MTLLoader();
+                mtlLoader.load('./pages/city/model/bbb.mtl', function (materials) {
+                    materials.preload();
+                    var objLoader = new THREE.OBJLoader();
+                    objLoader.setMaterials(materials);
+                    objLoader.load('./pages/city/model/bbb.obj', function (mesh) {
+                        mesh.traverse(function (node) {
+                            if (node instanceof THREE.Mesh) {
+                                node.castShadow = true;
+                                node.receiveShadow = true;
+                            }
+                        });
+                        mesh.position.set(0, 20, 0)
+                        state.scene.add(mesh)
+                    });
+                });
             },
-            createBuilding(vert) {
-                let arr = []
-                let _arr = []
-                vert.forEach(x => {
-                    _arr.push(...x)
-                })
-                // for (let i = 0; i < _arr.length; i++) {
-                // geometry.vertices.push(new THREE.Vector3(-1, 2, -1));
-                for (let x = 0; x < _arr.length - 1; x++) {
-                    if (x + 1 < _arr.length) {
-                        let p = state.projection(_arr[x])
-                        let p1 = state.projection(_arr[x + 1])
-                        //一面
-                        arr.push(p[0] - 600, 0, p[1] - 600)
-                        arr.push(p[0] - 600, 100, p[1] - 600)
-                        arr.push(p1[0] - 600, 0, p1[1] - 600)
-
-                        arr.push(p[0] - 600, 100, p[1] - 600)
-                        arr.push(p1[0] - 600, 100, p1[1] - 600)
-                        arr.push(p1[0] - 600, 0, p1[1] - 600)
-                        //顶部
-
-                    }
-                }
-
-                // } 
-                var geometry = new THREE.BufferGeometry();
-                // 创建一个简单的矩形. 在这里我们左上和右下顶点被复制了两次。
-                // 因为在两个三角面片里，这两个顶点都需要被用到。
-                var vertices = new Float32Array(arr);
-
-                // itemSize = 3 因为每个顶点都是一个三元组。
-                geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-                var material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-                var mesh = new THREE.Mesh(geometry, material)
-                state.scene.add(mesh);
-                var x = 0, y = 0;
-
-
-
-
+            path(){
+                
             }
+
         }
     }
 
