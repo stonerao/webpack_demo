@@ -1,6 +1,10 @@
 import geo from '../../json/test.json'
 import * as d3 from 'd3'
 import Base from '../../utils/base'
+/**
+ * @date 2019-03-28
+ * 鹏程金融系统演示
+ */
 let state = {};
 class City extends Base {
     constructor(params) {
