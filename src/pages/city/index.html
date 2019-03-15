@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,18 +8,148 @@
 	<script src="../../lib/three.min.js"></script>
 	<script type="text/javascript" src="../../lib/OrbitControls.js"></script>
 	<script type="text/javascript" src="../../lib/ColladaLoader.js"></script>
-    <script type="text/javascript" src="../../lib/MTLLoader.js"></script>
+	<script type="text/javascript" src="../../lib/MTLLoader.js"></script>
 	<script type="text/javascript" src="../../lib/OBJLoader.js"></script>
 	<script type="text/javascript" src="../../lib/Stats.js"></script>
 	<script type="text/javascript" src="../../lib/tween.js"></script>
 	<script type="text/javascript" src="../../lib/THREE.MeshLine.js"></script>
 	<link rel="stylesheet" href="../../styles/reset.css">
+	<link rel="stylesheet" href="../../styles/animate.css">
 </head>
+
 <body>
-	<div>
-		<div class="full" id="main">
-			<canvas id="city"></canvas>
+
+	<div class="full" id="main">
+		<canvas id="city"></canvas>
+	</div>
+	<div id="app">
+		<div class="map-top">
+			<div class="map-t-l mb "></div>
+			<div class="map-t-c  ">
+				{{title}}
+			</div>
+			<div class="map-t-r mb"></div>
+		</div>
+		<!-- 底部 -->
+		<div class="cbottom" v-show="show_state==0">
+			<div class="cbottom-his" @click="updateState(1)">
+				<!-- title -->
+				<span>历史威胁</span>
+			</div>
+			<div class="cbottom-items">
+				<div class="item-box cur" style="width:62px">
+					<div class="item-title item-time">&nbsp;</div>
+					<div class="item-content " @click="downFile">
+						<!-- 下载 -->
+						<img src="./images/down.png" alt="">
+					</div>
+
+				</div>
+				<div class="item-box">
+					<div class="item-title item-time">时间</div>
+					<div class="item-content op0" :class="title_class">{{show_items.date}}
+					</div>
+				</div>
+				<div class="item-box">
+					<div class="item-title item-type">威胁类型</div>
+					<div class="item-content op0 text-over" :class="title_class">
+						{{show_items.type}}</div>
+				</div>
+				<div class="item-box" style="flex:1">
+					<div class="item-title item-step">攻击步骤</div>
+					<div class="item-content" id="list-content">
+						<div class="cdivscontent">
+							<div class="steps cur animated fadeInUp"  v-for="(item,index) in show_items.step" :key="index">
+								<span class="stepsnum">{{index+1}}</span>
+								{{item.name}}
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<!-- 威胁列表展开 -->
+		<div class="cleft" v-show="show_state==1" :class="list_class_quit">
+			<div class="cleft-his" @click="updateState(0)">
+				<!-- title -->
+				<span>历史威胁</span>
+			</div>
+			<div class="cleft-select cleft-left cleft-time">
+				<span>选择展示条数</span>
+				<div class="cleft-select-item">
+					<span class="c-left-spans" @click="selectStart">
+						{{select_threat}}
+						<img src="./images/bi.png" alt="" class="select-item-t1" v-if="is_select_threat">
+						<img src="./images/ti.png" alt="" class="select-item-t1" v-if="!is_select_threat">
+					</span>
+					<div class="select-item" v-show="is_select_threat">
+						<div v-for="item in select_items" :key="item" @click="selectEvent(item)">
+							{{item}}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="cleft-listtitle">
+				<ul>
+					<li>
+						<div>时间</div>
+						<div>威胁类型</div>
+					</li>
+				</ul>
+			</div>
+			<div class="cleft-list" id="scorll">
+				<!-- <p  class="notdata">暂无数据</p> -->
+				<ul>
+					<li v-for="(item,index) in threat_items" :class="select_index==index?'active':''" :key="item._id">
+						<div>{{item.date}}</div>
+						<div>{{item.type}}</div>
+					</li>
+				</ul>
+			</div>
+
+		</div>
+		<img src="./images/play.png" @click="playEvenet(false)" v-if="is_play&&show_play" class="playPosition">
+		<!-- 暂停 -->
+		<img src="./images/out.png" @click="playEvenet(true)" v-if="!is_play&&show_play" class="playPosition">
+		<!-- 滚动播放 -->
+		<div class="info-list">
+			<span class="infotablist" v-show="show_items.step.length==show_items.list.length" @click="is_expand=!is_expand">{{!is_expand?'》':'《'}}</span>
+			<div id="infos" class="info-items info-itemsbakc" :style="{'width':is_expand?'1150px':''}">
+				<div class="infobox">
+					<!--  -->
+					<div :key="index" v-for="(item,index) in show_items.step.length" :class="index==0?'animated fadeIn':''" class="infoitem ">
+						<div class="infotitle text-over">
+							<span class="infotitleindex">{{index+1}}</span>
+							<span class="infotitlet">{{show_items.list[index].name}}</span>
+						</div>
+						<ul class="infolists">
+							<li>
+								<span>事件来源</span> <span>{{show_items.ae[index].device}}</span>
+							</li>
+							<li>
+								<span>事件id</span> <span>{{show_items.ae[index].id}}</span>
+							</li>
+							<li>
+								<span>源Ip</span> <span>{{show_items.ae[index].src}}</span>
+							</li>
+							<li>
+								<span>源端口</span> <span>{{show_items.ae[index].sport}}</span>
+							</li>
+							<li>
+								<span>目的ip</span> <span>{{show_items.ae[index].dst}}</span>
+							</li>
+							<li>
+								<span>目的端口</span> <span>{{show_items.ae[index].dport}}</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
+
 </body>
+
 </html>

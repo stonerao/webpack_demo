@@ -49,12 +49,14 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "d3": "^5.9.1",
     "less": "^3.0.4",
     "less-loader": "^4.1.0",
     "node-sass": "^4.9.0",
+    "perfect-scrollbar": "^1.4.0",
     "sass-loader": "^7.0.1",
-    "vue": "^2.6.8",
+    "vue": "^2.6.9",
     "webpack": "^4.29.6",
     "zepto": "^1.2.0"
   },

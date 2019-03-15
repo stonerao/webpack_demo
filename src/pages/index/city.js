@@ -100,6 +100,7 @@ class City extends Base {
                 }
                 mouse.x = (x / state.dom.innerWidth) * 2 - 1;
                 mouse.y = -(y / state.dom.innerHeight) * 2 + 1;
+              
                 state.raycaster.setFromCamera(mouse, state.camera);
                 let intersects = state.raycaster.intersectObjects([state.scene], true);
                 if (intersects.length > 0) {

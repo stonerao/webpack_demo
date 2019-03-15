@@ -54,10 +54,14 @@ class City extends Base {
                 state.renderer.setSize(state.width, state.height);
                 state.scene = new THREE.Scene()
                 state.camera = new THREE.PerspectiveCamera(45, state.width / state.height, 1, 10000);
-                state.camera.position.set(0, 300, 150)
+                state.camera.position.set(-2640.9713213300447, 1856.726436659051, 1609.9949255258614)
+                state.camera.lookAt({
+                    x: -0.7756341505340653,
+                    y: -0.7549578895713187,
+                    z: -0.5916894402561657
+                })
                 state.scene.add(state.camera)
-                state.load()
-
+                state.load() 
             },
             initControls() {
                 /* 创建鼠标事件 */
@@ -71,7 +75,7 @@ class City extends Base {
                 //是否自动旋转 controls.autoRotate = true; 设置相机距离原点的最远距离
                 controls.minDistance = 30;
                 //设置相机距离原点的最远距离
-                controls.maxDistance = 2000;
+                controls.maxDistance = 5000;
                 //是否开启右键拖拽
                 controls.enablePan = true;
             },
@@ -117,6 +121,7 @@ class City extends Base {
                 state.raycaster.setFromCamera(mouse, state.camera);
                 let intersects = state.raycaster.intersectObjects([state.scene], true);
                 if (intersects.length > 0) {
+                    console.log(intersects)
                     let obj = intersects[0].object;
                     if (obj.type !== "Mesh") return;
                     switch (event.button) {
@@ -130,54 +135,51 @@ class City extends Base {
                 }
             },
             helper() {
-                let gridHelper = new THREE.GridHelper(1000, 100);
-                state.scene.add(gridHelper);
-             /*    let ambient = new THREE.AmbientLight({
-                    color: 0xffffff,
-                    intensity: 2
+                //    let gridHelper = new THREE.GridHelper(10000, 200);
+                //     state.scene.add(gridHelper); 
+                /*    let ambient = new THREE.AmbientLight({
+                       color: 0xffffff,
+                       intensity: 2
+                   });
+                   state.scene.add(ambient); */
+                /* var light = new THREE.HemisphereLight({
+                    skyColor: 0xffffff, groundColor: 0x999999, intensity: 0.1
                 });
-                state.scene.add(ambient); */
-                 /* var light = new THREE.HemisphereLight({
-                     skyColor: 0xffffff, groundColor: 0x999999, intensity: 0.1
-                 });
-                 state.scene.add(light); 
-                light.position.y=500
-                light.position.x=-200
-                var helper = new THREE.HemisphereLightHelper(light, 5);
+                state.scene.add(light); 
+               light.position.y=500
+               light.position.x=-200
+               var helper = new THREE.HemisphereLightHelper(light, 5);
 
-                state.scene.add(helper); */
+               state.scene.add(helper); */
                 /*   var light = new THREE.PointLight(0xffffff, 1, 0);
                   light.position.set(50, 0, 150);
                   state.scene.add(light); */
 
-               /*  var spotLight = new THREE.SpotLight({
-                    color: 0xffffff,
-                    intensity: 2,
-                    decay: 1
-                });
-                spotLight.position.set(100, 100, 100);
+                /*  var spotLight = new THREE.SpotLight({
+                     color: 0xffffff,
+                     intensity: 2,
+                     decay: 1
+                 });
+                 spotLight.position.set(100, 100, 100);
+ 
+                 spotLight.castShadow = true;
+ 
+                 spotLight.shadow.mapSize.width = 1024;
+                 spotLight.shadow.mapSize.height = 1024;
+ 
+                 spotLight.shadow.camera.near = 500;
+                 spotLight.shadow.camera.far = 4000;
+                 spotLight.shadow.camera.fov = 30;
+ 
+                 state.scene.add(spotLight);
+ 
+                 var spotLightHelper = new THREE.SpotLightHelper(spotLight);
+                 state.scene.add(spotLightHelper); */
+                var light = new THREE.AmbientLight(0xffffff); // soft white light
+                state.scene.add(light);
+                var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                state.scene.add(directionalLight);
 
-                spotLight.castShadow = true;
-
-                spotLight.shadow.mapSize.width = 1024;
-                spotLight.shadow.mapSize.height = 1024;
-
-                spotLight.shadow.camera.near = 500;
-                spotLight.shadow.camera.far = 4000;
-                spotLight.shadow.camera.fov = 30;
-
-                state.scene.add(spotLight);
-
-                var spotLightHelper = new THREE.SpotLightHelper(spotLight);
-                state.scene.add(spotLightHelper); */
-
-                var pointLight = new THREE.PointLight(0xffffff, 3, 100);
-                pointLight.position.set(20, 30, 10);
-                state.scene.add(pointLight);
-
-                var sphereSize = 1;
-                var pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
-                state.scene.add(pointLightHelper);
             },
             load() {
                 state.initState()
@@ -188,16 +190,20 @@ class City extends Base {
                 state.createCity()
             },
             createCity() {
+                var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
                 var mtlLoader = new THREE.MTLLoader();
-                mtlLoader.load('./pages/city/model/bbb.mtl', function (materials) {
+                mtlLoader.load('./pages/city/model/city-gry.mtl', function (materials) {
                     materials.preload();
                     var objLoader = new THREE.OBJLoader();
                     objLoader.setMaterials(materials);
-                    objLoader.load('./pages/city/model/bbb.obj', function (mesh) {
+                    objLoader.load('./pages/city/model/city-gry.obj', function (mesh) { 
                         mesh.traverse(function (node) {
-                            if (node instanceof THREE.Mesh) {
+                            if (node instanceof THREE.Mesh) { 
                                 node.castShadow = true;
                                 node.receiveShadow = true;
+                                if (node.name =='q1'){
+                                    node.material = material
+                                }
                             }
                         });
                         mesh.position.set(0, 20, 0)
@@ -205,9 +211,10 @@ class City extends Base {
                     });
                 });
             },
-            path(){
-                
-            }
+            path() {
+
+            },
+
 
         }
     }

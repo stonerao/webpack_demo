@@ -33,8 +33,8 @@ const webpackConfigDev = {
         hot: true, // 开启热更新
         //服务器代理配置项
         proxy: {
-            '/testing/*': {
-                target: 'https://www.baidu.com',
+            '/hy/*': {
+                target: 'http://172.18.0.23',
                 secure: true,
                 changeOrigin: true
             }
