@@ -10,7 +10,7 @@ let VM = new Vue({
     el: "#app",
     data() {
         return {
-            title: "深圳市微观态势感知",
+            title: "网络安全威胁回放",
             unitId: 90000001,
             select_threat: 20,//选择的条数
             is_select_threat: false,//是否选择
@@ -35,11 +35,13 @@ let VM = new Vue({
             show_play: true,//是否显示暂停播放
             is_expand: false,//滚动播放是否展开
             _city: null,
-            title_class:"",
-            list_class_quit:""
+            title_class: "",
+            list_class_quit: ""
         }
     },
     created() {
+        console.log(query)
+        this.unitId = query.unit;
         this._city = new City({
             width: dom.offsetWidth,
             height: dom.offsetHeight - 3,
@@ -47,14 +49,16 @@ let VM = new Vue({
             stats: true
         })
         this.load()
+        document.getElementById("app").style.display="" 
+        document.querySelector("body").removeChild(document.getElementById("loading"))
     },
     methods: {
         load() {
             //页面加载时
             this.getThreatList(() => {
                 this.threat_scroll = initScroll("#scorll");
-                this.infos_scroll = initScroll("#infos","x");
-                this.content_scroll = initScroll("#list-content","x");
+                this.infos_scroll = initScroll("#infos", "x");
+                this.content_scroll = initScroll("#list-content", "x");
                 this.createGroup();
             })
         },
@@ -65,48 +69,53 @@ let VM = new Vue({
             }
             this.title_class = ""
             let item = this.show_items = this.threat_items[this.select_index];
-            setTimeout(()=>{
+            setTimeout(() => {
                 this.title_class = "animated fadeInUp opacity1"
-            },50)
+            }, 50)
             //设置默认参数
             this.is_expand = false
             item.step = [];
+
             let index = 0;
             //清除定时器 
             if (this.interval) {
                 clearInterval(this.interval)
             }
-            let dom = document.querySelector("#infos");
-            
-            this.interval = setInterval(() => {
+            let dom = document.querySelector("#infos"); 
+            const startStep = () =>{ 
                 //如果满足 取消定时器
                 if (index >= item.list.length) {
                     clearInterval(this.interval)
                     setTimeout(() => {
                         this.select_index++;
                         this.createGroup()
-                    }, 1000)
+                    },3000)
                     return
                 } 
-                item.step.push(item.list[index]) 
+                item.step.push(item.list[index])
+                //给THREE 传递需要展示信息
+                this._city.attack_step(item.list[index])
                 setTimeout(() => {
-                    
+                    //滑动
                     this.infos_scroll.update()
                     // dom.scrollLeft = index * 250 
                     let source = {
                         left: dom.scrollLeft
                     }
                     let target = {
-                        left: dom.scrollLeft +250
+                        left: dom.scrollLeft + 250
                     }
-                    
-                    _animated(source,target,1000,()=>{ 
+                    _animated(source, target, 1000, () => {
                         dom.scrollLeft = source.left
                     })
                     index++
-                })
-                
-            }, 1500);
+                }) 
+            }
+            setTimeout(()=>{
+                startStep()
+                this.interval = setInterval(startStep, 1500);
+            })
+            
         },
         playEvenet(state) {
             //播放暂停 
@@ -128,6 +137,10 @@ let VM = new Vue({
             }).then(res => {
                 if (res.ret_code !== 0) {
                     return false
+                }
+                if(res.threats.length===0){
+                    console.warn("数据为空")
+                    return;
                 }
                 this.threat_items = [];
                 let index = 0;
@@ -173,23 +186,27 @@ let VM = new Vue({
             this.is_select_threat = true
         },
         updateState(state) {
-            //更新显示状态
-            if(state==0){
-                this.list_class_quit = "animated fadeOutDown"
-                setTimeout(()=>{
-                    this.show_state = state; 
-                },800)
-            }else{
-                //暂停
-                this.list_class_quit = "animated fadeInUp"
-                this.show_state = state; 
-                this.playEvenet();
+            //更新显示状态 
+            switch (state) {
+                case 0:
+                    this.list_class_quit = "animated fadeOutDown"
+                    setTimeout(() => {
+                        this.show_state = state;
+                    }, 800)
+                    this.playEvenet(false);
+                    break;
+                case 1:
+                    //暂停
+                    this.list_class_quit = "animated fadeInUp"
+                    this.show_state = state;
+                    this.playEvenet(true);
+                    break;
             }
-            
+
         }
     }
 })
-function _animated(source, target, time, func,endFunc){
+function _animated(source, target, time, func, endFunc) {
     /**
      * @source 起始数据
      * @target 结束数据
@@ -200,13 +217,13 @@ function _animated(source, target, time, func,endFunc){
     createjs.Tween.get(source).to(target, time, createjs.Ease.quadInOut)
         .call(handleChange)
     var Time = setInterval(() => {
-        typeof func == 'function' ? func() : null; 
+        typeof func == 'function' ? func() : null;
     })
 
     function handleChange(event) {
         //完成 
         clearInterval(Time);
-        typeof endFunc == 'function' ? endFunc() : null; 
+        typeof endFunc == 'function' ? endFunc() : null;
     }
 }
 function funDownload(content, filename) {
@@ -228,8 +245,8 @@ function initScroll(id, state) {
     let params = {
         wheelSpeed: 1,
         wheelPropagation: true,
-        minScrollbarLength: 20, 
-        useBothWheelAxes:true
+        minScrollbarLength: 20,
+        useBothWheelAxes: true
     }
     if (state == 'x') {
         params.suppressScrollY = true

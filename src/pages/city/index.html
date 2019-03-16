@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>CITY</title>
+	<title>网络安全威胁回放</title>
 	<script src="../../lib/three.min.js"></script>
 	<script type="text/javascript" src="../../lib/OrbitControls.js"></script>
 	<script type="text/javascript" src="../../lib/ColladaLoader.js"></script>
@@ -18,11 +18,23 @@
 </head>
 
 <body>
-
+	<div class="full-loading " id="loading">
+		<div class="lds-roller">
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+		</div>
+		<div class="loding">loading...</div>
+	</div>
 	<div class="full" id="main">
 		<canvas id="city"></canvas>
 	</div>
-	<div id="app">
+	<div id="app" style="display: none">
 		<div class="map-top">
 			<div class="map-t-l mb "></div>
 			<div class="map-t-c  ">
@@ -114,7 +126,7 @@
 		<!-- 暂停 -->
 		<img src="./images/out.png" @click="playEvenet(true)" v-if="!is_play&&show_play" class="playPosition">
 		<!-- 滚动播放 -->
-		<div class="info-list">
+		<div class="info-list" v-show="show_state==0">
 			<span class="infotablist" v-show="show_items.step.length==show_items.list.length" @click="is_expand=!is_expand">{{!is_expand?'》':'《'}}</span>
 			<div id="infos" class="info-items info-itemsbakc" :style="{'width':is_expand?'1150px':''}">
 				<div class="infobox">
@@ -126,22 +138,22 @@
 						</div>
 						<ul class="infolists">
 							<li>
-								<span>事件来源</span> <span>{{show_items.ae[index].device}}</span>
+								<span>事件来源</span> <span>{{show_items.list[index].device}}</span>
 							</li>
 							<li>
-								<span>事件id</span> <span>{{show_items.ae[index].id}}</span>
+								<span>事件id</span> <span>{{show_items.list[index].id}}</span>
 							</li>
 							<li>
-								<span>源Ip</span> <span>{{show_items.ae[index].src}}</span>
+								<span>源Ip</span> <span>{{show_items.list[index].src}}</span>
 							</li>
 							<li>
-								<span>源端口</span> <span>{{show_items.ae[index].sport}}</span>
+								<span>源端口</span> <span>{{show_items.list[index].sport}}</span>
 							</li>
 							<li>
-								<span>目的ip</span> <span>{{show_items.ae[index].dst}}</span>
+								<span>目的ip</span> <span>{{show_items.list[index].dst}}</span>
 							</li>
 							<li>
-								<span>目的端口</span> <span>{{show_items.ae[index].dport}}</span>
+								<span>目的端口</span> <span>{{show_items.list[index].dport}}</span>
 							</li>
 						</ul>
 					</div>
