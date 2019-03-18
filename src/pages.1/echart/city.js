@@ -1,8 +1,10 @@
-import geo from '../../json/test.json'
+// import geo from '../../json/test.json'
 import china from './china'
 import * as d3 from 'd3'
 import Base from '../../utils/base'
 import IMG from '../../assets/map/earth.jpg'
+import ALL_POSITION from '../../json/position'
+console.log(ALL_POSITION)
 /* china.features.forEach((z,i)=>{
     z.properties = {
         name: z.properties.name,
@@ -16,6 +18,18 @@ import IMG from '../../assets/map/earth.jpg'
     })
     z.geometry.coordinates = arr
 }) */
+
+let arrs = china.features.map(x=>{
+    return {
+        name:x.properties.name, 
+        value:0,
+        itemStyle:{
+            normal: {
+                opacity: 0.5
+            }
+        }
+    }
+})
 /**
  * @date 2019-03-28
  * 鹏程金融系统演示
@@ -61,9 +75,11 @@ class City extends Base {
         });
         var mapTexture;
         var mapSize = {
-            width: 9192,
+            width: 8192,
             height: 4096
         };
+        const HEXAGON_RADIUS =2, CITY_MARGIN = 1;
+        let hexagon = new THREE.Object3D();
         return {
             initial() {
                 state.dom = document.getElementById(state.id)
@@ -75,10 +91,11 @@ class City extends Base {
                 state.renderer.setSize(state.width, state.height);
                 state.scene = new THREE.Scene()
                 state.camera = new THREE.PerspectiveCamera(45, state.width / state.height, 1, 10000);
-                state.camera.position.set(0, 300, 150)
+                state.camera.position.set(-67.12948362334046, 194.00511749684682, -265.24638887928046)
+                state.camera.rotation.set(-2.510092603274835, -0.20150229132048292, -2.9962386420132323)
                 state.scene.add(state.camera)
                 state.load()
-
+                
             },
             initControls() {
                 /* 创建鼠标事件 */
@@ -101,6 +118,7 @@ class City extends Base {
                     state._stats.update()
                 }
                 state.renderer.render(state.scene, state.camera);
+                
                 requestAnimationFrame(state.AnimationFrame);
             },
             initState() {
@@ -138,14 +156,17 @@ class City extends Base {
                 state.raycaster.setFromCamera(mouse, state.camera);
                 let intersects = state.raycaster.intersectObjects([state.scene], true);
                 if (intersects.length > 0) {
-                    // 根据射线相交点的uv反算出在canvas上的坐标
-                    var x1 = intersects[0].uv.x * mapSize.width;
-                    var y1 = mapSize.height - intersects[0].uv.y * mapSize.height;
+                    // 根据射线相交点的uv反算出在canvas上的坐标 
+                    if (intersects[0].uv){
+                        var x1 = intersects[0].uv.x * mapSize.width;
+                        var y1 = mapSize.height - intersects[0].uv.y * mapSize.height;
 
-                    // 在mapCanvas上模拟鼠标事件，这里或许有更好的方法
-                    var virtualEvent = document.createEvent('MouseEvents');
-                    virtualEvent.initMouseEvent('mousemove', false, true, document.defaultView, 1, x1, y1, x1, y1, false, false, false, false, 0, null);
-                    state.mapCanvas.dispatchEvent(virtualEvent);
+                        // 在mapCanvas上模拟鼠标事件，这里或许有更好的方法
+                        var virtualEvent = document.createEvent('MouseEvents');
+                        virtualEvent.initMouseEvent('mousemove', false, true, document.defaultView, 1, x1, y1, x1, y1, false, false, false, false, 0, null);
+
+                        state.mapCanvas.dispatchEvent(virtualEvent);
+                    }
 
                     let obj = intersects[0].object;
                     if (obj.type !== "Mesh") return;
@@ -174,27 +195,27 @@ class City extends Base {
                 state.helper()
 
                 state.renderEarth()
+                state.curEarth()
             },
             renderEarth(_json) {
                 var globeTextureLoader = new THREE.TextureLoader();
-                var texture = new THREE.TextureLoader().load("../../assets/map/earth4.jpg");
-                var earth_bump = new THREE.TextureLoader().load("../../assets/map/earth_bump.jpg");
-                var earth_specular = new THREE.TextureLoader().load("../../assets/map/earth_spec.jpg");
-                var earthGeometry = new THREE.SphereGeometry(200, 36, 36);
+                var earth_texture = new THREE.TextureLoader().load("../../assets/map/earth.jpeg");
+                var earth_bump = new THREE.TextureLoader().load("../../assets/map/bump.jpeg");
+                var earth_specular = new THREE.TextureLoader().load("../../assets/map/spec.jpeg");
+                var earthGeometry = new THREE.SphereGeometry(199, 36, 36);
                 var earthMaterial = new THREE.MeshPhongMaterial({
                     map: mapTexture,
-                    // map: texture,
                     shininess: 40,
                     bumpScale: 1,
+                    // map: earth_texture,
                     bumpMap: earth_bump,
-                    specularMap: earth_specular
-                    // color: 0xffffff,
-                    // alpha: true
+                    specularMap: earth_specular , 
                 });
                 var earth = new THREE.Mesh(earthGeometry, earthMaterial);
                 state.scene.add(earth)
                 state.earthInital()
-               
+ 
+
                 /*   var globeTextureLoader = new THREE.TextureLoader();
                   globeTextureLoader.load('../../assets/map/earth.jpg', function (texture) {
                       var globeGgeometry = new THREE.SphereGeometry(190, 36, 36);
@@ -233,19 +254,19 @@ class City extends Base {
                     state.scene.add(cube);
                     cube.position.set(position.x, position.y, position.z)
                 }
-                renderHouse(125.908772, 40.227883, 4)
+               /*  renderHouse(125.908772, 40.227883, 4)
                 renderHouse(109.59037, 19.020694, 4)
                 setTimeout(() => {
                     state.addline(
                         [109.59037, 19.020694, 4], [125.908772, 40.227883, 4]
                     )
                 }, 2000)
-                state.drawChinaMap()
+                state.drawChinaMap() */
 
             },
             getPosition(lng, lat, alt) {
                 // 获取position 
-                var phi = (103 - lat) * (Math.PI / 180),
+                var phi = (90 - lat) * (Math.PI / 180),
                     theta = (lng + 180) * (Math.PI / 180),
                     radius = alt + 200,
                     x = -(radius * Math.sin(phi) * Math.cos(theta)),
@@ -307,11 +328,19 @@ class City extends Base {
                 mapTexture = new THREE.Texture(state.mapCanvas);
 
                 var chart = echarts.init(state.mapCanvas);
-
+                population.forEach(x => {
+                    x.value = ""
+                    x.itemStyle = {
+                        normal: {
+                            opacity: 0.2
+                        }
+                    }
+                })
+                state.population = [...population, ...arrs]
                 let option = {
-                    backgroundColor:{
+                    backgroundColor: {
                         image: img,
-                        repeat: 'repeat' 
+                        repeat: 'no-repeat'
                     },
                     visualMap: {
                         show: false,
@@ -320,7 +349,7 @@ class City extends Base {
                         text: ['High', 'Low'],
                         realtime: false,
                         calculable: true,
-                       
+
                     },
                     series: [
                         {
@@ -328,12 +357,12 @@ class City extends Base {
                             mapType: 'world',
                             roam: true,
                             aspectScale: 1,
-                            layoutCenter: ['50%', '50%'],
-                            layoutSize: 9192,
-                            itemStyle: {
-                                emphasis: { label: { show: true } }
-                            },
-                            data: population    // from population.js
+                            layoutCenter: ['50%', '42%'],
+                            layoutSize: mapSize.width,
+                            /* itemStyle: {
+                                   emphasis: { label: { show: true } },
+                               },  */
+                            data: state.population   // from population.js
                         },
 
                     ]
@@ -341,7 +370,17 @@ class City extends Base {
 
                 chart.setOption(option);
                 mapTexture.needsUpdate = true;
+                setTimeout(()=>{
+                    option.series[0].data.forEach(x=>{
+                        if(x.name=="四川省"){
+                            var virtualEvent = document.createEvent('MouseEvents');
+                            virtualEvent.initMouseEvent('mousemove', false, true, document.defaultView, 1, 3368.2329375153577, 566.6006816370782, 3368.2329375153577, 566.6006816370782, false, false, false, false, 0, null);
 
+                            state.mapCanvas.dispatchEvent(virtualEvent); 
+                            return
+                        }
+                    })
+                },5000)
                 // 选中或移出时才更新贴图
                 // 内存向显存上传数据很慢，应该尽量减少贴图更新
                 chart.on('mouseover', function () {
@@ -350,8 +389,96 @@ class City extends Base {
 
                 chart.on('mouseout', function () {
                     mapTexture.needsUpdate = true;
-                });
-                console.log(chart)
+                }); 
+            },
+            curEarth() {
+                state.loaderImg = {
+                    conne_1: new THREE.TextureLoader().load('../../assets/map/lightray.jpg'),
+                    conne_2: new THREE.TextureLoader().load('../../assets/map/lightray_yellow.jpg')
+                }
+                
+
+
+
+                let index = 0; 
+                while(index<ALL_POSITION.length)
+                {
+                    state.createShapeConne(ALL_POSITION[index].val)
+                    index++
+                }
+                
+            },
+            createShapeConne(position){
+                //创建光锥地表 
+                state.initConne(state.getPosition(position[0], position[1], 0))
+                state.initHexagon(state.getPosition(position[0], position[1], 0), 1)
+            },
+            initHexagon(position,index){
+                //地表
+               const hexagonColor = [0xffffff, 0xffff00]
+                const color = hexagonColor[index]
+                let hexagonLine = new THREE.CircleGeometry(HEXAGON_RADIUS, 6)
+                let hexagonPlane = new THREE.CircleGeometry(HEXAGON_RADIUS - CITY_MARGIN, 6)
+                let vertices = hexagonLine.vertices
+                vertices.shift() // 第一个节点是中心点
+                let circleLineGeom = new THREE.Geometry()
+                circleLineGeom.vertices = vertices
+                let materialLine = new THREE.MeshBasicMaterial({
+                    color: color,
+                    side: THREE.DoubleSide
+                })
+                let materialPlane = new THREE.MeshBasicMaterial({
+                    color: color,
+                    side: THREE.DoubleSide,
+                    opacity: 0.5
+                })
+                let circleLine = new THREE.LineLoop(circleLineGeom, materialLine)
+                let circlePlane = new THREE.Mesh(hexagonPlane, materialPlane)
+                circleLine.position.copy(position)
+                circlePlane.position.copy(position)
+                circlePlane.lookAt(new THREE.Vector3(0, 0, 0))
+                circleLine.lookAt(new THREE.Vector3(0, 0, 0))
+
+                hexagon.add(circleLine)
+                hexagon.add(circlePlane)
+                state.scene.add(hexagon)
+            },
+            initConne(position) { 
+                //光锥
+                let texture = state.loaderImg.conne_2,
+                    material = new THREE.MeshBasicMaterial({
+                        map: texture,
+                        transparent: true,
+                        depthTest: false,
+                        side: THREE.DoubleSide,
+                        blending: THREE.AdditiveBlending
+                    }),
+                    height = Math.random()*40,
+                    geometry = new THREE.PlaneGeometry(HEXAGON_RADIUS, height),
+                    matrix1 = new THREE.Matrix4,
+                    plane1 = new THREE.Mesh(geometry, material)
+                matrix1.makeRotationX(Math.PI / 2)
+                matrix1.setPosition(new THREE.Vector3(0, 0, height / -2))
+                geometry.applyMatrix(matrix1)
+            /*     let plane2 = plane1.clone()
+                plane2.rotation.z = Math.PI / 2 /2
+                plane1.add(plane2) */
+
+                let plane3 = plane1.clone()
+                plane3.rotation.z = Math.PI / 2 
+                plane1.add(plane3)
+
+                /* let plane4 = plane1.clone()
+                plane4.rotation.z = Math.PI / 2 + Math.PI / 2 / 2
+                plane1.add(plane4) */
+
+                plane1.position.copy(position)
+                plane1.lookAt(0, 0, 0)
+                state.scene.add(plane1) 
+                setInterval(()=>{
+                    plane1.rotation.z +=0.05
+                },200)  
+
             }
         }
     }

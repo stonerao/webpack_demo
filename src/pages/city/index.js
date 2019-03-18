@@ -36,65 +36,127 @@ let VM = new Vue({
             is_expand: false,//滚动播放是否展开
             _city: null,
             title_class: "",
-            list_class_quit: ""
+            list_class_quit: "",
+            ws: null,
+            test_data: {}
         }
     },
     created() {
-        console.log(query)
-        this.unitId = query.unit;
+        this.unitId = query.unit || "all";
         this._city = new City({
             width: dom.offsetWidth,
             height: dom.offsetHeight - 3,
             id: "city",
-            stats: true
+            stats: true,
+            Vue: this
         })
-        this.load()
-        document.getElementById("app").style.display="" 
+        setTimeout(()=>{
+            this.load()
+        },2000)
+        document.getElementById("app").style.display = ""
         document.querySelector("body").removeChild(document.getElementById("loading"))
     },
     methods: {
+        socket(func) {
+            this.ws = new WebSocket(`ws://172.18.0.23/${query.city}/api/websocket/microSituation`);
+            this.ws.onopen = () => { 
+                this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
+                console.log(typeof func)
+                typeof func =='function'?func():'';
+            };
+            this.ws.onmessage = e => {
+                if (e.data === "Connect micro situation successful") return;
+                let data = JSON.parse(e.data);
+                if (!data.kg.list) {
+                    return
+                } 
+
+                this.threat_items.unshift({
+                    attachment: data.attachment||[],
+                    date: data.date,
+                    type: data.kg.name,
+                    list: data.kg.list,
+                    step: [],
+                    ae: data.kg.ae,
+                    id: data.kg.id,
+                    _id: data._id
+                })
+                if (this.select_index < this.threat_items.length - 1) {
+                    this.select_index++;
+                }
+                if (this.threat_items.length > this.select_threat) {
+                    this.threat_items.pop()
+                } 
+                if (this.threat_items.length==1){
+                    this.createGroup()
+                }
+            }
+            this.ws.onerror = e => { };
+            this.ws.onclose = () => {
+                //通道关闭了
+                if (this.ws.readyState == 3) {
+                    setTimeout(()=>{ 
+                        this.socket();
+                    },5000)
+                }
+            };
+            
+        },
         load() {
             //页面加载时
             this.getThreatList(() => {
                 this.threat_scroll = initScroll("#scorll");
                 this.infos_scroll = initScroll("#infos", "x");
-                this.content_scroll = initScroll("#list-content", "x");
-                this.createGroup();
+                this.content_scroll = initScroll("#list-content", "x"); 
+                this.createGroup()
+              /*  this.socket(()=>{
+                })  */
             })
         },
         createGroup() {
             //开始运行  
-            if (this.select_index == this.threat_items.length) {
+            if (this.select_index >= this.threat_items.length) {
                 this.select_index = 0;
             }
+            if (this.threat_items.length == 0) return;  
             this.title_class = ""
             let item = this.show_items = this.threat_items[this.select_index];
             setTimeout(() => {
                 this.title_class = "animated fadeInUp opacity1"
             }, 50)
             //设置默认参数
+        
             this.is_expand = false
             item.step = [];
-
+            this._city.state.deleteStep()
             let index = 0;
             //清除定时器 
             if (this.interval) {
                 clearInterval(this.interval)
             }
-            let dom = document.querySelector("#infos"); 
-            const startStep = () =>{ 
+            if(this.ws){ 
+                if (query.graph == "1506" && item._id) { 
+                    this.ws.send(JSON.stringify({
+                        mongoId:  item._id.toString() 
+                    }))
+                }
+            }
+            let dom = document.querySelector("#infos");
+            const startStep = () => {
                 //如果满足 取消定时器
                 if (index >= item.list.length) {
                     clearInterval(this.interval)
                     setTimeout(() => {
-                        this.select_index++;
-                        this.createGroup()
-                    },3000)
+                        if (!this.is_play){
+                            this.select_index++; 
+                            this.createGroup()
+                        }
+                    }, 3000)
                     return
-                } 
+                }
                 item.step.push(item.list[index])
                 //给THREE 传递需要展示信息
-                this._city.attack_step(item.list[index])
+                this._city.attack_step(item.list, index)
                 setTimeout(() => {
                     //滑动
                     this.infos_scroll.update()
@@ -109,39 +171,59 @@ let VM = new Vue({
                         dom.scrollLeft = source.left
                     })
                     index++
-                }) 
+                })
             }
-            setTimeout(()=>{
+            setTimeout(() => {
                 startStep()
                 this.interval = setInterval(startStep, 1500);
             })
-            
+
         },
         playEvenet(state) {
             //播放暂停 
             if (!state) {
                 //播放
                 this.createGroup()
+                this._city.state.autoControls()
             } else {
                 //暂停
                 clearInterval(this.interval)
+                this._city.auto_state = false;
+                clearInterval(this._city.state.is_auto)
             }
             this.is_play = state
         },
         getThreatList(func) {
-            axios(`${query.city}/api/microSituation/getUnitThreatList`, {
-                params: {
+            // axios(`/${query.city}/api/microSituation/getUnitThreatList`, {
+            axios(`/hy/get_threat/?unit_id=all&amount=10`, {
+                /*  params: {
                     unitId: this.unitId,
                     amount: this.select_threat
-                }
+                }   */
             }).then(res => {
-                if (res.ret_code !== 0) {
+                let index = 0;
+                this.threat_items = []
+                while (index < res.length) {
+                    let item = res[index]
+                    this.threat_items.push({
+                        attachment: item.attachment,
+                        date: item.date,
+                        type: item.kg.name,
+                        list: item.kg.list,
+                        step: [],
+                        _id: item._id
+                    })
+                    index++;
+                }
+                console.log(this.threat_items)
+               /*  if (res.ret_code !== 0) {
                     return false
                 }
-                if(res.threats.length===0){
+                if (res.threats.length === 0) {
                     console.warn("数据为空")
-                    return;
                 }
+                this.test_data = res.threats[10]
+
                 this.threat_items = [];
                 let index = 0;
                 while (index < res.threats.length) {
@@ -149,14 +231,14 @@ let VM = new Vue({
                     this.threat_items.push({
                         attachment: item.attachment,
                         date: item.date,
-                        type: item.type,
+                        type: item.kg.name,
                         list: item.kg.list,
-                        step: [],
-                        ae: item.kg.ae,
-                        id: item.kg.id,
+                        step: [],  
+                        _id:item._id
                     })
                     index++;
                 }
+ */
                 typeof func == "function" ? func() : '';
             })
         },

@@ -5,16 +5,16 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>网络安全威胁回放</title>
-	<script src="../../lib/three.min.js"></script>
-	<script type="text/javascript" src="../../lib/OrbitControls.js"></script>
-	<script type="text/javascript" src="../../lib/ColladaLoader.js"></script>
-	<script type="text/javascript" src="../../lib/MTLLoader.js"></script>
-	<script type="text/javascript" src="../../lib/OBJLoader.js"></script>
-	<script type="text/javascript" src="../../lib/Stats.js"></script>
-	<script type="text/javascript" src="../../lib/tween.js"></script>
-	<script type="text/javascript" src="../../lib/THREE.MeshLine.js"></script>
-	<link rel="stylesheet" href="../../styles/reset.css">
-	<link rel="stylesheet" href="../../styles/animate.css">
+	<script src="./assets/js/three.min.js"></script>
+	<script type="text/javascript" src="./assets/js/OrbitControls.js"></script>
+	<script type="text/javascript" src="./assets/js/ColladaLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/MTLLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/OBJLoader.js"></script>
+	<script type="text/javascript" src="./assets/js/Stats.js"></script>
+	<script type="text/javascript" src="./assets/js/tween.js"></script>
+	<script type="text/javascript" src="./assets/js/THREE.MeshLine.js"></script>
+	<link rel="stylesheet" href="./assets/styles/reset.css">
+	<link rel="stylesheet" href="./assets/styles/animate.css">
 </head>
 
 <body>
@@ -35,12 +35,17 @@
 		<canvas id="city"></canvas>
 	</div>
 	<div id="app" style="display: none">
-		<div class="map-top">
+		<!-- <div class="map-top">
 			<div class="map-t-l mb "></div>
 			<div class="map-t-c  ">
 				{{title}}
 			</div>
 			<div class="map-t-r mb"></div>
+		</div> -->
+		<div class="title">
+			<div class="title-text">
+				{{title}}
+			</div>
 		</div>
 		<!-- 底部 -->
 		<div class="cbottom" v-show="show_state==0">
@@ -53,7 +58,7 @@
 					<div class="item-title item-time">&nbsp;</div>
 					<div class="item-content " @click="downFile">
 						<!-- 下载 -->
-						<img src="./images/down.png" alt="">
+						<img src="../../assets/images/down.png" alt="">
 					</div>
 
 				</div>
@@ -93,8 +98,8 @@
 				<div class="cleft-select-item">
 					<span class="c-left-spans" @click="selectStart">
 						{{select_threat}}
-						<img src="./images/bi.png" alt="" class="select-item-t1" v-if="is_select_threat">
-						<img src="./images/ti.png" alt="" class="select-item-t1" v-if="!is_select_threat">
+						<img src="../../assets/images/bi.png" alt="" class="select-item-t1" v-if="is_select_threat">
+						<img src="../../assets/images/ti.png" alt="" class="select-item-t1" v-if="!is_select_threat">
 					</span>
 					<div class="select-item" v-show="is_select_threat">
 						<div v-for="item in select_items" :key="item" @click="selectEvent(item)">
@@ -122,12 +127,12 @@
 			</div>
 
 		</div>
-		<img src="./images/play.png" @click="playEvenet(false)" v-if="is_play&&show_play" class="playPosition">
+		<img src="../../assets/images/play.png" @click="playEvenet(false)" v-if="is_play&&show_play" class="playPosition">
 		<!-- 暂停 -->
-		<img src="./images/out.png" @click="playEvenet(true)" v-if="!is_play&&show_play" class="playPosition">
+		<img src="../../assets/images/out.png" @click="playEvenet(true)" v-if="!is_play&&show_play" class="playPosition">
 		<!-- 滚动播放 -->
-		<div class="info-list" v-show="show_state==0">
-			<span class="infotablist" v-show="show_items.step.length==show_items.list.length" @click="is_expand=!is_expand">{{!is_expand?'》':'《'}}</span>
+		<div class="info-list" v-show="show_state==0&&show_items.step.length!=0">
+			<span class="infotablist" v-show="show_items.step.length==show_items.list.length" @click="is_expand=!is_expand">{{is_expand?'》':'《'}}</span>
 			<div id="infos" class="info-items info-itemsbakc" :style="{'width':is_expand?'1150px':''}">
 				<div class="infobox">
 					<!--  -->
@@ -138,22 +143,22 @@
 						</div>
 						<ul class="infolists">
 							<li>
-								<span>事件来源</span> <span>{{show_items.list[index].device}}</span>
-							</li>
+								<span>时间</span> <span>{{show_items.list[index].time}}</span>
+							</li> 
 							<li>
-								<span>事件id</span> <span>{{show_items.list[index].id}}</span>
-							</li>
-							<li>
-								<span>源Ip</span> <span>{{show_items.list[index].src}}</span>
+								<span>源IP</span> <span>{{show_items.list[index].src}}</span>
 							</li>
 							<li>
 								<span>源端口</span> <span>{{show_items.list[index].sport}}</span>
 							</li>
 							<li>
-								<span>目的ip</span> <span>{{show_items.list[index].dst}}</span>
+								<span>目的IP</span> <span>{{show_items.list[index].dst}}</span>
 							</li>
 							<li>
 								<span>目的端口</span> <span>{{show_items.list[index].dport}}</span>
+							</li>
+							<li>
+								<span>事件来源</span> <span>{{show_items.list[index].device}}</span>
 							</li>
 						</ul>
 					</div>

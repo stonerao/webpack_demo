@@ -6,7 +6,7 @@ import axios from '../../utils/axios'
 let dom = document.getElementById("main")
 let _city = new City({
     width: dom.offsetWidth,
-    height: dom.offsetHeight - 3,
+    height: dom.offsetHeight - 5,
     id: "city",
     stats:true
 })

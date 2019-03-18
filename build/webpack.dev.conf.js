@@ -33,8 +33,13 @@ const webpackConfigDev = {
         hot: true, // 开启热更新
         //服务器代理配置项
         proxy: {
-            '/hy/*': {
+            /* '/hy/*': {
                 target: 'http://172.18.0.23',
+                secure: true,
+                changeOrigin: true
+            } */
+            '/hy/*': {
+                target: 'http://172.18.0.23:7000',
                 secure: true,
                 changeOrigin: true
             }

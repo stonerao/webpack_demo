@@ -1,8 +1,7 @@
 import geo from '../../json/test.json'
 import * as d3 from 'd3'
 import Base from '../../utils/base'
-import cityPotion from './model/city.json'
-
+import cityPotion from '../../assets/model/city.json'
 /**
  * @date 2019-03-28
  * 鹏程金融系统演示
@@ -26,10 +25,11 @@ class City extends Base {
             projection: d3.geoMercator().fitSize([width, height], geo),
             ...this.methods(),
             resolutio: new THREE.Vector2(window.innerWidth, window.innerHeight),
-            is_auto: true,//是否自动旋转
-
+            is_auto: null,//是否自动旋转  
+            auto_state:false
         })
         this.created()
+        this._cit_json = this.cloneJSON(cityPotion)
     }
     created() {
         state.initial()
@@ -67,30 +67,35 @@ class City extends Base {
             color: new THREE.Color("#e17cff"),
         });
 
+        var obj_material = new THREE.MeshPhongMaterial({ color: 0x233353 });
+        var obj_material1 = new THREE.MeshPhongMaterial({ color: 0x4979D2 });
+        var obj_material2 = new THREE.MeshPhongMaterial({ color: 0xff8800 });
+        //加载默认图
         var startImgs = {
-            "2-1-1": "/pages/city/images/2-1-1.png",
-            "2-1-2": "/pages/city/images/2-1-2.png",
-            "2-1-3": "/pages/city/images/2-1-3.png",
-            "2-2-1": "/pages/city/images/2-2-1.png",
-            "2-2-2": "/pages/city/images/2-2-2.png",
-            "2-2-3": "/pages/city/images/2-2-3.png",
-            "2-2-4": "/pages/city/images/2-2-4.png",
-            "2-2-5": "/pages/city/images/2-2-5.png",
-            "2-3-1": "/pages/city/images/2-3-1.png",
-            "2-3-2": "/pages/city/images/2-3-2.png",
-            "2-3-3": "/pages/city/images/2-3-3.png",
-            "2-3-5": "/pages/city/images/2-3-4.png",
-            "2-3-4": "/pages/city/images/2-3-5.png",
-            "2-4-1": "/pages/city/images/2-4-1.png",
-            "2-4-2": "/pages/city/images/2-4-2.png",
-            "2-4-3": "/pages/city/images/2-4-3.png",
+            "2-1-1": "./assets/images/2-1-1.png",
+            "2-1-2": "./assets/images/2-1-2.png",
+            "2-1-3": "./assets/images/2-1-3.png",
+            "2-2-1": "./assets/images/2-2-1.png",
+            "2-2-2": "./assets/images/2-2-2.png",
+            "2-2-3": "./assets/images/2-2-3.png",
+            "2-2-4": "./assets/images/2-2-4.png",
+            "2-2-5": "./assets/images/2-2-5.png",
+            "2-3-1": "./assets/images/2-3-1.png",
+            "2-3-2": "./assets/images/2-3-2.png",
+            "2-3-3": "./assets/images/2-3-3.png",
+            "2-3-5": "./assets/images/2-3-4.png",
+            "2-3-4": "./assets/images/2-3-5.png",
+            "2-4-1": "./assets/images/2-4-1.png",
+            "2-4-2": "./assets/images/2-4-2.png",
+            "2-4-3": "./assets/images/2-4-3.png",
         }
         var loadImg = {
-            step1: '/pages/city/images/step1.png',
-            step2: '/pages/city/images/step2.png',
-            step3: '/pages/city/images/step3.png',
-            step4: '/pages/city/images/step4.png',
+            step1: './assets/images/step1.png',
+            step2: './assets/images/step2.png',
+            step3: './assets/images/step3.png',
+            step4: './assets/images/step4.png',
         }
+        var FOOT_IMG = './assets/images/FOOT.png';
         for (var key in startImgs) {
             var img = new Image()
             img.src = startImgs[key]
@@ -101,6 +106,15 @@ class City extends Base {
             img.src = loadImg[key]
             loadImg[key] = img
         }
+        var background_arrack = new Image()
+        background_arrack.src = './assets/images/zpbj.png'
+        var brand_img = background_arrack;
+        var background_Foot = new Image()
+        background_Foot.src = FOOT_IMG
+
+        state.SATELILITE_POSITION = [0, 1500, 0]//卫星位置
+
+       
         return {
 
             initial() {
@@ -110,9 +124,10 @@ class City extends Base {
                 });
                 state.renderer.setClearColor(0x000f1c, 1.0);
                 state.renderer.setSize(state.width, state.height);
+                state.renderer.shadowMapEnabled = true;//开启阴影，加上阴影渲染
                 state.scene = new THREE.Scene()
                 state.camera = new THREE.PerspectiveCamera(45, state.width / state.height, 1, 10000);
-                state.camera.position.set(-549.4169406773624, 2566.4153921051607, 2859.7444122667116)
+                state.camera.position.set(-549.4169406773624, 2966.4153921051607, 2859.7444122667116)
                 state.camera.lookAt({
                     x: -0.7930697902928766,
                     y: 0.05569297857116938,
@@ -123,27 +138,36 @@ class City extends Base {
 
             },
             initControls() {
-                /* 创建鼠标事件 */
-                let controls;
-                controls = new THREE.OrbitControls(state.camera, state.renderer.domElement);
-                controls.enableDamping = true;
+                /* 创建鼠标事件 */ 
+                state.controls = new THREE.OrbitControls(state.camera, state.renderer.domElement);
+                state.controls.enableDamping = true;
                 //动态阻尼系数 就是鼠标拖拽旋转灵敏度
-                controls.dampingFactor = 1;
+                state.controls.dampingFactor = 1;
                 //是否可以缩放
-                controls.enableZoom = true;
-                //是否自动旋转 controls.autoRotate = true; 设置相机距离原点的最远距离
-                controls.minDistance = 30;
+                state.controls.enableZoom = true;
+                //是否自动旋转 state.controls.autoRotate = true; 设置相机距离原点的最远距离
+                state.controls.minDistance = 30;
                 //设置相机距离原点的最远距离
-                controls.maxDistance = 5000;
+                state.controls.maxDistance = 5000;
                 //是否开启右键拖拽
-                controls.enablePan = true;
-                controls.enableRotate = true;
-                controls.autoRotate = true;
-                controls.autoRotateSpeed = 0.4;
-                setInterval(() => {
-                    controls.update()
-                })
+                state.controls.enablePan = true;
+                state.controls.enableRotate = true;
+                state.controls.autoRotate = true;
+                state.controls.autoRotateSpeed = 0.3;
+                this.autoControls()
+                setTimeout(()=>{
+                    state.controls.saveState()
+                },1000)
 
+            },
+            autoControls(){
+                if (state.is_auto){
+                    clearInterval(state.is_auto)
+                }  
+                state.auto_state = true
+                state.is_auto = setInterval(()=>{
+                    state.controls.update() 
+                })
             },
             AnimationFrame() {
                 if (state.stats) {
@@ -173,24 +197,33 @@ class City extends Base {
                 state.scene.remove(mesh)
             },
             cameraAnimated(start) {
-                return
+                clearInterval(state.is_auto) 
                 cameraPosition = _this.cloneJSON(start)
                 let end = state.camera.position
-                start.y += 500
-                start.z += 400
-                start.x += 300
-
+                start.y += 400
+                start.z += 200 
                 let p1 = state.transformPostion(cameraPosition)
-                state._animated(end, start, 2000, () => {
-                    let p = state.transformPostion(end)
-                    state.camera.position.set(...p)
-                    state.camera.lookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-
+                /* let p1 = state.transformPostion(cameraPosition)
+                state._animated(end, start, 1000, () => { 
+                    state.camera.position.set(end.x, end.y, end.z)
+                    state.camera.lookAt(...p1);  
+                      
                 }, () => {
 
 
-                })
+                }) */
+                createjs.Tween.get(end).to(start, 2000, createjs.Ease.quadInOut)
+                    .call(handleChange)
+                var cameraTime = setInterval(() => { 
+                    state.camera.position.set(end.x, end.y, end.z)  
+                    state.camera.lookAt(...p1);  
+                     
+                }) 
+                function handleChange(event) {
+                    //完成
+                    clearInterval(cameraTime)
+
+                }
             },
             mouseup(event) {
                 var material = new THREE.MeshPhongMaterial({ color: 0x5599aa });
@@ -209,26 +242,45 @@ class City extends Base {
                 state.raycaster.setFromCamera(mouse, state.camera);
                 let intersects = state.raycaster.intersectObjects([state.scene], true);
                 if (intersects.length > 0) {
-                    let obj = intersects[0].object;
-
+                    let elems = intersects.filter(x => x.object.type != "Sprite") 
+                    let elem = elems[0] 
+                    let obj = elem.object;
+                     
                     /*  
                      position.y+=250
                      position.x+=150
                      state.camera.position.set(...state.transformPostion(position))
                      state.camera.lookAt(...state.transformPostion(intersects[0].point)) */
                     // obj.material = material
-                    /*  let p = _this.cloneJSON(intersects[0].point) 
-                     state.cameraAnimated({
-                         x: p.x,
-                         y: p.y,
-                         z: p.z
-                     }) */
-                    if (obj.type !== "Mesh") return;
+                    
+                    
+                    // if (obj.type !== "Mesh") return;
+                     
                     switch (event.button) {
-                        case 2:
-                            //左键
-                            break;
                         case 0:
+                            //左键 
+                            if (obj.params_type == 'city') {
+                                let p = _this.cloneJSON(elem.point)  
+                                document.getElementById("app").style.display = 'none'
+                                state.Vue.playEvenet(true)
+                                state.auto_state = false
+                                state.cameraAnimated({
+                                    x: p.x,
+                                    y: p.y,
+                                    z: p.z
+                                })
+                            } else {
+                              
+                                if (!state.auto_state){
+                                    state.autoControls()
+                                    state.Vue.playEvenet(false)
+                                }
+                                state.controls.reset() 
+                                document.getElementById("app").style.display = 'block'
+                                // 
+                            }
+                            break;
+                        case 2:
                             //右键
                             break;
                     }
@@ -245,27 +297,56 @@ class City extends Base {
                     return [position.x, position.y, position.z]
                 }
             },
+            addFoot() {
+                let canvas = document.createElement('canvas');
+                let RECT_SIZE = 1024 * 6; //大小 
+                canvas.width = RECT_SIZE;
+                canvas.height = RECT_SIZE;
+                let context = canvas.getContext("2d");
+
+                context.fillStyle = context.createPattern(background_Foot, 'repeat');
+                context.fillRect(0, 0, RECT_SIZE, RECT_SIZE);
+                let routerName = new THREE.Texture(canvas);
+                routerName.needsUpdate = true;
+                //地板
+                var geometry = new THREE.PlaneGeometry(7500, 7500);
+                var material = new THREE.MeshLambertMaterial({
+                    map: routerName,
+                    color: 0xaaaaaa,
+                    side: THREE.DoubleSide
+                });
+                var plane = new THREE.Mesh(geometry, material);
+                state.scene.add(plane);
+                plane.rotation.x = Math.PI / 2
+                plane.position.y = -1
+                plane.receiveShadow = true;
+            },
             helper() {
-                //    let gridHelper = new THREE.GridHelper(10000, 200);
-                //     state.scene.add(gridHelper); 
+                /*  let gridHelper = new THREE.GridHelper(10000, 200);
+                   state.scene.add(gridHelper);  */
 
                 var light = new THREE.AmbientLight(0xffffff); // soft white light
                 state.scene.add(light);
-                var directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+                var directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
                 state.scene.add(directionalLight);
 
-                /*  var spotLight = new THREE.SpotLight({
-                     color:0xffffff,
-                      
-                 });
-                 spotLight.position.set(2000, 3000, -900);
-                 spotLight.shadow.camera.near = 500;
-                 spotLight.shadow.camera.far = 4000;
-                 spotLight.shadow.camera.fov = 30;
-                 state.scene.add(spotLight);
- 
-                 var spotLightHelper = new THREE.SpotLightHelper(spotLight);
-                 state.scene.add(spotLightHelper); */
+                setTimeout(() => {
+                    this.addFoot()
+                }, 300)
+
+                var spotLight = new THREE.SpotLight({
+                    color: 0xffffff,
+
+                });
+                spotLight.position.set(2500, 3500, -900);
+                spotLight.shadow.camera.near = 500;
+                spotLight.shadow.camera.far = 4000;
+                spotLight.shadow.camera.fov = 30;
+                spotLight.castShadow = true;    // 让光源产生阴影
+                state.scene.add(spotLight);
+
+                /* var spotLightHelper = new THREE.SpotLightHelper(spotLight);
+                state.scene.add(spotLightHelper); */
 
 
 
@@ -275,13 +356,17 @@ class City extends Base {
                 state.AnimationFrame()
                 state.dom.addEventListener("mouseup", state.mouseup)
                 state.helper()
+                //添加城市
                 state.createCity()
+                //添加卫星
+                this.addSatellite()
                 let json = _this.cloneJSON(cityPotion)
                 for (let i = 0; i < json.length; i++) {
                     if (json[i].position) {
                         state.addText(json[i].unit_name, json[i].position)
                     }
-                }
+                } 
+                
                 let index = 0;
                 let len = json.length
                 let _arr = []
@@ -305,13 +390,13 @@ class City extends Base {
                     y: 310.7971529695683,
                     z: 292.14446481983396
                 }
-                setTimeout(() => {
+              /*   setTimeout(() => {
                     state.cameraAnimated({
                         x: p.x,
                         y: p.y,
                         z: p.z
                     })
-                }, 5000)
+                }, 5000) */
                 /*  setInterval(() => {
                      state.addLine(linkJson[parseInt(Math.random() * linkJson.length - 1)], linkJson[parseInt(Math.random() * linkJson.length - 1)])
                  }, 2000) */
@@ -340,29 +425,52 @@ class City extends Base {
                 var sprScale = 50;
                 spriteText.scale.set(sprScale * text.length, sprScale, 1);
                 spriteText.position.set(position.x, position.y + 50, position.z);
-                spriteText.paramsType = "title"
+                spriteText.params_type = "title"
                 state.scene.add(spriteText);
 
             },
-            createCity() {
-                var material = new THREE.MeshPhongMaterial({ color: 0x316d79 });
-                var material1 = new THREE.MeshPhongMaterial({ color: 0xcc7832 });
+            addSatellite() {
+                var material = new THREE.MeshPhongMaterial({ color: 0x999999 });
                 var mtlLoader = new THREE.MTLLoader();
-                mtlLoader.load('./pages/city/model/city.mtl', function (materials) {
+                mtlLoader.load('../assets/model/satellite.mtl', function (materials) {
                     materials.preload();
                     var objLoader = new THREE.OBJLoader();
                     objLoader.setMaterials(materials);
-                    objLoader.load('./pages/city/model/city.obj', function (mesh) {
-
+                    objLoader.load('../assets/model/satellite.obj', function (mesh) {
                         mesh.traverse(function (node) {
                             if (node instanceof THREE.Mesh) {
                                 node.castShadow = true;
                                 node.receiveShadow = true;
-
+                                node.material = material
+                            }
+                        });
+                        mesh.position.set(state.SATELILITE_POSITION[0], state.SATELILITE_POSITION[1], state.SATELILITE_POSITION[2])
+                        state.scene.add(mesh)
+                        setInterval(() => {
+                            mesh.rotation.y +=0.01
+                        }, 20)
+                    });
+                });
+                
+            },
+            createCity() {
+               
+                var mtlLoader = new THREE.MTLLoader();
+                mtlLoader.load('../assets/model/city.mtl', function (materials) {
+                    materials.preload();
+                    var objLoader = new THREE.OBJLoader();
+                    objLoader.setMaterials(materials);
+                    objLoader.load('../assets/model/city.obj', function (mesh) { 
+                        mesh.traverse(function (node) {
+                            if (node instanceof THREE.Mesh) {
+                                node.castShadow = true;
+                                node.receiveShadow = true; 
                                 if (node.name === "city") {
-                                    node.material = material
+                                    node.material = obj_material
+                                    
                                 } else {
-                                    node.material = material1
+                                    node.material = obj_material1
+                                    node.params_type = "city"
                                 }
                                 /*  
                                  if (node.name == 'q1') {
@@ -370,6 +478,8 @@ class City extends Base {
                             }
                         });
                         mesh.position.set(900, 20, 0)
+                        mesh.params_type = "all_city"
+                        console.log(mesh)
                         state.scene.add(mesh)
                     });
                 });
@@ -377,7 +487,7 @@ class City extends Base {
             path() {
 
             },
-            addLine(src, dst, reference) {
+            addLine(src, dst, reference, index,dstNode) {
                 if (!src || !dst) {
                     return
                 }
@@ -391,8 +501,15 @@ class City extends Base {
                     y: dst[1],
                     z: dst[2]
                 }
+                let _center = [
+                    (src[0] + dst[0]) / 2,
+                    (src[1] + dst[1]) / 2,
+                    (src[2] + dst[2]) / 2
+                ]
+                
                 //线条颜色
                 let colorIndex = reference.split("-")[1];
+                // colorIndex = Math.random() < 0.2 ? '4' : colorIndex
                 let mesh_line
                 switch (colorIndex) {
                     case "1":
@@ -408,9 +525,15 @@ class City extends Base {
                         mesh_line = linne_mesh_4
 
                 }
-                console.log(colorIndex)
                 //线条
-                let cinum = 300;
+                let cinum = 400;
+                let HEIGHT_LINE = index%2? 40:-40;//每次增加高度
+                var curve = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(_src.x, _src.y, _src.z),
+                    new THREE.Vector3(_center[0] + index * HEIGHT_LINE, _center[1] , _center[2]),
+                    new THREE.Vector3(_dst.x, _dst.y, _dst.z),
+                ]);
+                let vector = curve.getPoints(cinum);
                 var geometry = new THREE.Geometry();
                 for (let i = 0; i < cinum; i++) {
                     geometry.vertices.push(new THREE.Vector3(...src));
@@ -419,59 +542,164 @@ class City extends Base {
                 line.setGeometry(geometry);
                 var mesh = new THREE.Mesh(line.geometry, mesh_line);
                 mesh.frustumCulled = false;
+                mesh.params_type = "step"
                 state.scene.add(mesh);
+                let _IMG = this.addLineShowStep(reference, _src)
+                let n=0; 
+                let tim = setInterval(() => {
+                    n++;
+                    if (n >= cinum) {  
+                        if (dstNode){ 
+                            state.shiny(dstNode)
+                        }
+                        state.addStep([_center[0] + index * HEIGHT_LINE, _center[1]  , _center[2]], index, reference)
+                        state.dispose(_IMG) 
+                        clearInterval(tim)  
+                    }else{
+                        line.advance(vector[n]) 
+                        _IMG.position.set(vector[n].x, vector[n].y , vector[n].z)
+                    }
+                     
+                }, 1500 / cinum)
                 //线条动画
-                state._animated(_src, _dst, 1500, () => {
+                /* state._animated(_src, _dst, 1500, () => {
                     line.advance(new THREE.Vector3(_src.x, _src.y, _src.z))
+                    _IMG.position.set(_src.x, _src.y, _src.z)
                 }, () => {
-                    state._animated(_src, _dst, 1500, () => {
-                        line.advance(new THREE.Vector3(_src.x, _src.y, _src.z))
-                    }, () => {
-                        state.dispose(mesh)
-                    })
-                })
-
-
+                    state.addStep(_center, index, reference)
+                    state.dispose(_IMG) 
+                }) */
             },
-            initBrand(brand){
-                var canvas = document.createElement('canvas');
-                canvas.width = brand.length * 512;
-                canvas.height = 512;
-                var context = canvas.getContext("2d");
+            addStep(position, index, reference) {
+                //连线展示开始图标
+                let canvas = document.createElement('canvas');
+                let RECT_SIZE = 256; //大小
+                let RECT_PADDING = 0;
+                let Step = parseInt(reference.split("-")[1])
+                let _IMG = loadImg['step' + Step]
+                canvas.width = RECT_SIZE;
+                canvas.height = RECT_SIZE;
+                let context = canvas.getContext("2d");
+                context.drawImage(_IMG, 0, 0, RECT_SIZE - RECT_PADDING, RECT_SIZE - RECT_PADDING);
+                context.font = 'bold 120px Arial';
+                context.fillStyle = '#fff';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.lineWidth = 200;
+                context.fillText(index, RECT_SIZE / 2, RECT_SIZE / 2);
+                let routerName = new THREE.Texture(canvas);
+                routerName.needsUpdate = true;
+                let sprMat = new THREE.SpriteMaterial({ map: routerName });
+                let spriteText = new THREE.Sprite(sprMat);
+                let sprScale = 80;
+                spriteText.scale.set(sprScale, sprScale, 1);
+                spriteText.position.set(position[0], position[1] + 70, position[2]);
+                spriteText.params_type = "step"
+                state.scene.add(spriteText);
+                return spriteText
+            },
+            addLineShowStep(img_code, position) {
+                //连线展示开始图标
+                let canvas = document.createElement('canvas');
+                let RECT_SIZE = 256; //大小
+                canvas.width = RECT_SIZE;
+                canvas.height = RECT_SIZE;
+                let context = canvas.getContext("2d");
+                context.drawImage(startImgs[img_code], 0, 0, RECT_SIZE, RECT_SIZE);
+
+                let routerName = new THREE.Texture(canvas);
+                routerName.needsUpdate = true;
+                let sprMat = new THREE.SpriteMaterial({ map: routerName });
+                let spriteText = new THREE.Sprite(sprMat);
+                let sprScale = 100;
+                spriteText.scale.set(sprScale, sprScale, 1);
+                spriteText.position.set(position[0], position[1], position[2]);
+                spriteText.params_type = "step"
+                state.scene.add(spriteText);
+                return spriteText
+            },
+            initBrand(brand) {
+                let canvas = document.createElement('canvas');
+                let RECT_SIZE = 256; //大小
+                let RECT_PADDING = 40; //大小
+                let IMG_SIZE = RECT_SIZE - RECT_PADDING * 2
+                canvas.width = brand.length * RECT_SIZE;
+                canvas.height = RECT_SIZE;
+                let context = canvas.getContext("2d");
                 // context.fillStyle = "#FFFFFF";
                 context.fillRect(0, 0, canvas.width, canvas.height);
-                context.drawImage(brandImg, 0, 0, brand.length * 512, 512);
+                context.drawImage(brand_img, 0, 0, brand.length * RECT_SIZE, RECT_SIZE);
                 brand.forEach((b, i) => {
                     add(b, i)
                 })
                 function add(obj, i) {
-                    context.drawImage(startImgs[obj.img], i * 512 + 60, 0, 800, 800);
-                    context.font = 'bold 200px Arial';
+                    context.drawImage(startImgs[obj.img], i * RECT_SIZE + RECT_PADDING, 0, IMG_SIZE, IMG_SIZE);
+                    context.font = 'bold 70px Arial';
                     context.fillStyle = '#fff';
                     context.textAlign = 'center';
                     context.textBaseline = 'middle';
                     context.lineWidth = 20;
-                    context.fillText(obj.sort + 1, i * 512 + 300, 900);
+                    context.fillText(obj.sort, i * 256 + 120, 215);
                 }
                 return canvas
             },
-            initBrandGo(brand, position) { 
+            deleteStep() {
+                let nodes = state.scene.children;
+                let index = 0;
+                //还原
+                while (index < nodes.length) { 
+                       if (nodes[index].params_type == "all_city") {
+                            let children = nodes[index].children
+                            for (let i = 0; i < children.length; i++) {
+                                // children[i]. 
+                                if (children[i].params_type == 'city') {
+                                    children[i].material = obj_material1
+                                }
+                            }
+                        }  
+                    index++
+                }
+                //删除
+                 
+                nodes.filter(x => x.params_type == 'step').forEach(x=>{
+                    state.dispose(x)
+                })
+            },
+            getAttackBrand(unit_id) {
+                //是否已有内部攻击展示
+                let index = 0;
+                let nodes = state.scene.children;
+                while (index < nodes.length) {
+                    if (nodes[index].unit_id == unit_id) {
+                        return nodes[index]
+                    }
+                    index++
+                }
+                return false
+            },
+            initBrandGo(brand, position) {
+                // this.deleteStep() 
+                //查找是否已有当前建筑的内部攻击提示
+                let node = state.getAttackBrand(brand[0].unit_id)
+                if (node !== false) {
+                    brand.unshift(...node.params)
+                    state.dispose(node)
+                }
                 var routerName = new THREE.Texture(state.initBrand(brand));
                 routerName.needsUpdate = true;
                 var sprMat = new THREE.SpriteMaterial({ map: routerName });
                 var spriteText = new THREE.Sprite(sprMat);
-                var sprScale = 40;
+                var sprScale = 100;
                 spriteText.scale.set(sprScale * brand.length, sprScale, 1);
-                spriteText.position.set(position.x, 0, position.z);
-                spriteText.paramsType = "brand"
-                spriteText.params = {
-                    ip: brand[0].ip
-                }
-                scene.add(spriteText);
+                spriteText.position.set(position[0], 0, position[2]);
+                spriteText.params_type = "step"
+                spriteText.unit_id = brand[brand.length - 1].unit_id
+                spriteText.params = brand;
+                state.scene.add(spriteText);
                 var target = {
                     y: 0
                 }
-                createjs.Tween.get(target).to({ y: position.y + 20 }, 1000, createjs.Ease.elasticOut)
+                createjs.Tween.get(target).to({ y: position[1] + 120 }, 1000, createjs.Ease.elasticOut)
                     .call(handleChange)
                 var time = setInterval(() => {
                     spriteText.position.y = target.y
@@ -501,6 +729,41 @@ class City extends Base {
                     clearInterval(Time);
                     typeof endFunc == 'function' ? endFunc() : null;
                 }
+            },
+            nameGetNode(name){
+                //根据名字找到当前 建筑
+                let nodes = state.scene.children;
+                let index = 0; 
+                while (index < nodes.length) {
+                    if (nodes[index].params_type=="all_city"){
+                        let num=0; 
+                        let children = nodes[index].children
+                        while (num < nodes[index].children.length){
+                            let names = children[num].name.split("-")  
+                            if (names[0]==name){  
+                                return children[num]
+                            }
+                            num++
+                        }
+                    }
+                    /* if (nodes[index].name) {
+                        if (nodes[index].name.split("-")[1] == "鹏城西城分行内控管理部") {
+                        }
+                    } */
+                    index++
+                }
+                return false
+            },
+            shiny(node){
+                //高亮建筑 
+                var material = new THREE.MeshPhongMaterial({ color: 0xff42000 });
+                let _node = state.nameGetNode(node.unit_name)
+                console.log(_node)
+                if(_node){
+
+                    _node.material = obj_material2
+                }
+                
             }
 
         }
@@ -508,44 +771,74 @@ class City extends Base {
     cloneJSON(data) {
         return JSON.parse(JSON.stringify(data))
     }
-    attack_step(item) {
-        //获取网段
+    attack_step(parent, index) {
+        let item = parent[index];
+        //获取网段 
         let src_p, dst_p;
-        if (item.src == "0.0.0.0") {
-            src_p = [0, 3000, 0]
+        let src_node, dst_node;
+       
+        if (item.attacker == "0.0.0.0") {
+            src_p = this.state.SATELILITE_POSITION
         } else {
             //根据网段找到数据
-            let src = this.ip_get_network(item.src)
-            let src_node = this.getNode(src)
+            let src = this.ip_get_network(item.attacker)
+            src_node = this.getNode(src)
             src_p = this.state.transformPostion(src_node.position)
         }
-        if (item.dst == "0.0.0.0") {
-            dst_p = [0, 3000, 0]
+        if (item.target == "0.0.0.0") {
+            dst_p = this.state.SATELILITE_POSITION
         } else {
-            let dst = this.ip_get_network(item.dst)
-            let dst_node = this.getNode(dst)
+            let dst = this.ip_get_network(item.target)
+            dst_node = this.getNode(dst)
             dst_p = this.state.transformPostion(dst_node.position)
         }
-        console.log(item)
-        return
-        if (dst_p.toString() == src_p.toString()){
-
-        }else{
+        // src_p = Math.random() < 0.5 ? src_p : this.state.SATELILITE_POSITION 
+        
+        if (dst_p.toString() == src_p.toString()) {
+            //添加属性
+            item.attack_type = 1;//当前是统一建筑
+            item.sort = index + 1;//当前步骤
+            item.dst_p = dst_p;//当前步骤 
+            item.unit_id = dst_node.unit_id;//当前步骤  
+            this.state.initBrandGo([{
+                sort: item.sort,
+                img: item.reference,
+                dst_p: item.dst_p,
+                unit_id: item.unit_id
+            }], dst_p)
+        } else {
             this.state.addLine(
                 src_p,
                 dst_p,
-                item.reference
+                item.reference,
+                index + 1,
+                dst_node
             )
         }
-         
+    }
+    muster_attack(items) {
+        //查找内部攻击的建筑
+        let index = 0
+        let arr = [];
+        while (index < items.length) {
+            //只要attack_type==1
+            if (items[index].attack_type === 1) {
+                arr.push(items[index])
+            }
+            index++;
+        }
+        return arr
     }
     ip_get_network(str) {
         return str.split("/")[0].split(".")[2]
     }
+    claerHistory() {
+
+    }
     getNode(net) {
         let index = 0;
-        while (index < cityPotion.length) {
-            let unit = cityPotion[index]
+        while (index < this._cit_json.length) {
+            let unit = this._cit_json[index]
             if (unit.subnet.indexOf(net) !== -1) {
                 return unit
             }

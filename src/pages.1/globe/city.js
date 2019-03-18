@@ -146,7 +146,7 @@ class City extends Base {
             },
             renderEarth(_json) {
                 var globeTextureLoader = new THREE.TextureLoader();
-                globeTextureLoader.load('../../assets/map/earth.jpg', function (texture) {
+                globeTextureLoader.load('./assets/map/earth.jpg', function (texture) {
                     var globeGgeometry = new THREE.SphereGeometry(200, 100, 100);
                     var globeMaterial = new THREE.MeshStandardMaterial({ map: texture });
                     var globeMesh = new THREE.Mesh(globeGgeometry, globeMaterial);
