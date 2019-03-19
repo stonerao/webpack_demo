@@ -124,7 +124,7 @@ class City extends Base {
                 });
                 state.renderer.setClearColor(0x000f1c, 1.0);
                 state.renderer.setSize(state.width, state.height);
-                state.renderer.shadowMapEnabled = true;//开启阴影，加上阴影渲染
+                // state.renderer.shadowMapEnabled = true;//开启阴影，加上阴影渲染
                 state.scene = new THREE.Scene()
                 state.camera = new THREE.PerspectiveCamera(45, state.width / state.height, 1, 10000);
                 state.camera.position.set(-549.4169406773624, 2966.4153921051607, 2859.7444122667116)
@@ -178,6 +178,9 @@ class City extends Base {
                 requestAnimationFrame(state.AnimationFrame);
             },
             initState() {
+                if (!state.stats) {
+                    return
+                }
                 /* 监控状态 */
                 state._stats = new Stats();
                 state._stats.setMode(0);
@@ -269,13 +272,13 @@ class City extends Base {
                                     y: p.y,
                                     z: p.z
                                 })
-                            } else {
-                              
+                            } else { 
                                 if (!state.auto_state){
                                     state.autoControls()
                                     state.Vue.playEvenet(false)
+                                    state.controls.reset() 
                                 }
-                                state.controls.reset() 
+                               
                                 document.getElementById("app").style.display = 'block'
                                 // 
                             }
@@ -319,7 +322,7 @@ class City extends Base {
                 state.scene.add(plane);
                 plane.rotation.x = Math.PI / 2
                 plane.position.y = -1
-                plane.receiveShadow = true;
+                // plane.receiveShadow = true;
             },
             helper() {
                 /*  let gridHelper = new THREE.GridHelper(10000, 200);
@@ -342,7 +345,7 @@ class City extends Base {
                 spotLight.shadow.camera.near = 500;
                 spotLight.shadow.camera.far = 4000;
                 spotLight.shadow.camera.fov = 30;
-                spotLight.castShadow = true;    // 让光源产生阴影
+                // spotLight.castShadow = true;    // 让光源产生阴影
                 state.scene.add(spotLight);
 
                 /* var spotLightHelper = new THREE.SpotLightHelper(spotLight);
@@ -463,7 +466,7 @@ class City extends Base {
                     objLoader.load('../assets/model/city.obj', function (mesh) { 
                         mesh.traverse(function (node) {
                             if (node instanceof THREE.Mesh) {
-                                node.castShadow = true;
+                                // // node.castShadow = true;
                                 node.receiveShadow = true; 
                                 if (node.name === "city") {
                                     node.material = obj_material
@@ -478,8 +481,7 @@ class City extends Base {
                             }
                         });
                         mesh.position.set(900, 20, 0)
-                        mesh.params_type = "all_city"
-                        console.log(mesh)
+                        mesh.params_type = "all_city" 
                         state.scene.add(mesh)
                     });
                 });
@@ -757,8 +759,7 @@ class City extends Base {
             shiny(node){
                 //高亮建筑 
                 var material = new THREE.MeshPhongMaterial({ color: 0xff42000 });
-                let _node = state.nameGetNode(node.unit_name)
-                console.log(_node)
+                let _node = state.nameGetNode(node.unit_name) 
                 if(_node){
 
                     _node.material = obj_material2
@@ -777,18 +778,18 @@ class City extends Base {
         let src_p, dst_p;
         let src_node, dst_node;
        
-        if (item.attacker == "0.0.0.0") {
+        if (item.src == "0.0.0.0") {
             src_p = this.state.SATELILITE_POSITION
         } else {
             //根据网段找到数据
-            let src = this.ip_get_network(item.attacker)
+            let src = this.ip_get_network(item.src)
             src_node = this.getNode(src)
             src_p = this.state.transformPostion(src_node.position)
         }
-        if (item.target == "0.0.0.0") {
+        if (item.dst == "0.0.0.0") {
             dst_p = this.state.SATELILITE_POSITION
         } else {
-            let dst = this.ip_get_network(item.target)
+            let dst = this.ip_get_network(item.dst)
             dst_node = this.getNode(dst)
             dst_p = this.state.transformPostion(dst_node.position)
         }

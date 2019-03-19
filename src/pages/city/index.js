@@ -38,7 +38,11 @@ let VM = new Vue({
             title_class: "",
             list_class_quit: "",
             ws: null,
-            test_data: {}
+            test_data: {},
+            unit_list:[],
+            assets_list:{},
+            unit_assets_inter:null,
+            
         }
     },
     created() {
@@ -47,14 +51,16 @@ let VM = new Vue({
             width: dom.offsetWidth,
             height: dom.offsetHeight - 3,
             id: "city",
-            stats: true,
+            stats: false,
             Vue: this
         })
+        this.microStatistics()
         setTimeout(()=>{
             this.load()
+            document.getElementById("app").style.display = ""
+            document.querySelector("body").removeChild(document.getElementById("loading"))
         },2000)
-        document.getElementById("app").style.display = ""
-        document.querySelector("body").removeChild(document.getElementById("loading"))
+       
     },
     methods: {
         socket(func) {
@@ -70,9 +76,12 @@ let VM = new Vue({
                 if (!data.kg.list) {
                     return
                 } 
-
-                this.threat_items.unshift({
-                    attachment: data.attachment||[],
+                //检测是否已有
+                let item = this.threat_items.filter(elem=>elem._id==data._id)
+                //如果有替换 负责
+             
+                let obj = {
+                    attachment: data.attachment || [],
                     date: data.date,
                     type: data.kg.name,
                     list: data.kg.list,
@@ -80,7 +89,17 @@ let VM = new Vue({
                     ae: data.kg.ae,
                     id: data.kg.id,
                     _id: data._id
-                })
+                }
+                if(item.length!=0){ 
+                    for(let i=0;i<this.threat_items.length;i++){
+                        if(this.threat_items[i]._id==data._id)
+                        {
+                            this.threat_items[i] = obj
+                        }
+                    }
+                }else{ 
+                    this.threat_items.unshift(obj)
+                }
                 if (this.select_index < this.threat_items.length - 1) {
                     this.select_index++;
                 }
@@ -102,15 +121,118 @@ let VM = new Vue({
             };
             
         },
+        microStatistics(func) {
+            this.ws = new WebSocket(`ws://172.18.0.23/${query.city}/api/websocket/microStatistics`);
+            this.ws.onopen = () => { 
+                this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() })) 
+                typeof func =='function'?func():'';
+            };
+            this.ws.onmessage = e => {
+                if (e.data === "Connect micro situation successful") return;
+                let data = JSON.parse(e.data);
+                this.unit_list = data.statistics;
+                let index = 1;
+                clearInterval(this.unit_assets_inter)
+                let _this = this;
+                let set_data=(data)=> {
+                    _this.assets_list = data
+                }
+                set_data({
+                    "unit": "鹏城西城分行对公营销部",
+                    "threat": "145",
+                    "vulnerability": "38",
+                    "asset": [
+                        {
+                            "ip": "192.168.104.45",
+                            "threat": "82",
+                            "vulnerability": "21"
+                        },
+                        {
+                            "ip": "192.168.104.81",
+                            "threat": "63",
+                            "vulnerability": "17"
+                        }
+                    ]
+                })
+                this.unit_assets_inter = setInterval(x=>{
+                    if (index>=this.unit_list.length){
+                        index = 0
+                    } 
+                    
+                    // this.assets_list = this.unit_list[index];
+                    set_data({
+                        "unit": "鹏城西城分行对公营销部",
+                        "threat": "145",
+                        "vulnerability": "38",
+                        "asset": [
+                            {
+                                "ip": "192.168.104.45",
+                                "threat": "82",
+                                "vulnerability": "21"
+                            },
+                            {
+                                "ip": "192.168.104.81",
+                                "threat": "63",
+                                "vulnerability": "17"
+                            }
+                        ]
+                    })
+                    index++
+                },3000)
+                
+                
+            }
+            this.ws.onerror = e => { };
+            this.ws.onclose = () => {
+                //通道关闭了
+                if (this.ws.readyState == 3) {
+                    setTimeout(()=>{ 
+                        this.microStatistics();
+                    },5000)
+                }
+            };
+            
+        },
         load() {
             //页面加载时
             this.getThreatList(() => {
                 this.threat_scroll = initScroll("#scorll");
                 this.infos_scroll = initScroll("#infos", "x");
                 this.content_scroll = initScroll("#list-content", "x"); 
-                this.createGroup()
-              /*  this.socket(()=>{
-                })  */
+                 this.socket(()=>{
+                    this.createGroup()
+                })  
+            })
+        },
+        expandEvent(){
+            //滑动模块点击 
+
+            if (this.is_expand){
+                //展开  
+                this.playEvenet(false) 
+               
+            }else{
+                this.is_expand = true;
+                this.playEvenet(true)
+                
+                    document.querySelector("#infos").scrollLeft = 0;
+                  
+            }
+            // this.is_expand = !this.is_expand;
+        },
+        scrollStep(index){
+            //滑动到当前模块
+            if(!this.is_expand){
+                return
+            }
+            let dom = document.querySelector("#infos");
+            let scorll = dom.scrollLeft;
+            let src = {
+                scroll: scorll
+            } 
+            _animated(src, { scroll: index * 250 }, 1000, () => {
+
+                dom.scrollLeft = src.scroll
             })
         },
         createGroup() {
@@ -194,14 +316,14 @@ let VM = new Vue({
             this.is_play = state
         },
         getThreatList(func) {
-            // axios(`/${query.city}/api/microSituation/getUnitThreatList`, {
-            axios(`/hy/get_threat/?unit_id=all&amount=10`, {
-                /*  params: {
+            axios(`/${query.city}/api/microSituation/getUnitThreatList`, {
+            // axios(`/hy/get_threat/?unit_id=all&amount=10`, {
+               params: {
                     unitId: this.unitId,
                     amount: this.select_threat
-                }   */
+                }    
             }).then(res => {
-                let index = 0;
+                /* let index = 0;
                 this.threat_items = []
                 while (index < res.length) {
                     let item = res[index]
@@ -215,8 +337,8 @@ let VM = new Vue({
                     })
                     index++;
                 }
-                console.log(this.threat_items)
-               /*  if (res.ret_code !== 0) {
+                console.log(this.threat_items) */
+                if (res.ret_code !== 0) {
                     return false
                 }
                 if (res.threats.length === 0) {
@@ -238,7 +360,7 @@ let VM = new Vue({
                     })
                     index++;
                 }
- */
+ 
                 typeof func == "function" ? func() : '';
             })
         },

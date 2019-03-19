@@ -15,6 +15,131 @@
 	<script type="text/javascript" src="./assets/js/THREE.MeshLine.js"></script>
 	<link rel="stylesheet" href="./assets/styles/reset.css">
 	<link rel="stylesheet" href="./assets/styles/animate.css">
+	<style>
+		.full-loading {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			right: 0;
+			left: 0;
+			z-index: 555;
+			background: #010419;
+			text-align: center;
+			z-index: 1000;
+		}
+
+
+		.loding {
+			color: #fff;
+			line-height: 80px;
+		}
+
+		.lds-roller {
+			margin-top: 30%;
+			display: inline-block;
+			position: relative;
+			width: 64px;
+			height: 64px;
+		}
+
+		.lds-roller div {
+			animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+			transform-origin: 32px 32px;
+		}
+
+		.lds-roller div:after {
+			content: " ";
+			display: block;
+			position: absolute;
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: #fff;
+			margin: -3px 0 0 -3px;
+		}
+
+		.lds-roller div:nth-child(1) {
+			animation-delay: -0.036s;
+		}
+
+		.lds-roller div:nth-child(1):after {
+			top: 50px;
+			left: 50px;
+		}
+
+		.lds-roller div:nth-child(2) {
+			animation-delay: -0.072s;
+		}
+
+		.lds-roller div:nth-child(2):after {
+			top: 54px;
+			left: 45px;
+		}
+
+		.lds-roller div:nth-child(3) {
+			animation-delay: -0.108s;
+		}
+
+		.lds-roller div:nth-child(3):after {
+			top: 57px;
+			left: 39px;
+		}
+
+		.lds-roller div:nth-child(4) {
+			animation-delay: -0.144s;
+		}
+
+		.lds-roller div:nth-child(4):after {
+			top: 58px;
+			left: 32px;
+		}
+
+		.lds-roller div:nth-child(5) {
+			animation-delay: -0.18s;
+		}
+
+		.lds-roller div:nth-child(5):after {
+			top: 57px;
+			left: 25px;
+		}
+
+		.lds-roller div:nth-child(6) {
+			animation-delay: -0.216s;
+		}
+
+		.lds-roller div:nth-child(6):after {
+			top: 54px;
+			left: 19px;
+		}
+
+		.lds-roller div:nth-child(7) {
+			animation-delay: -0.252s;
+		}
+
+		.lds-roller div:nth-child(7):after {
+			top: 50px;
+			left: 14px;
+		}
+
+		.lds-roller div:nth-child(8) {
+			animation-delay: -0.288s;
+		}
+
+		.lds-roller div:nth-child(8):after {
+			top: 45px;
+			left: 10px;
+		}
+
+		@keyframes lds-roller {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
 </head>
 
 <body>
@@ -31,6 +156,11 @@
 		</div>
 		<div class="loding">loading...</div>
 	</div>
+	<div class="title">
+		<div class="title-text">
+			网络安全威胁回放
+		</div>
+	</div>
 	<div class="full" id="main">
 		<canvas id="city"></canvas>
 	</div>
@@ -42,12 +172,70 @@
 			</div>
 			<div class="map-t-r mb"></div>
 		</div> -->
-		<div class="title">
-			<div class="title-text">
-				{{title}}
+		
+		<!-- 底部 -->
+		<div class="unit-list ">
+			<div class="unit-item unit-list--unit">
+				<div class="unit--item-title">
+					高风险单位
+				</div>
+				<ul class="unit--item-list">
+					<li >
+						<div style="width:180px;"> 
+							单位名称
+						</div>
+						<div>
+							受威胁数
+						</div>
+						<div>
+							漏洞数
+						</div>
+					</li>
+					<li v-for="(item,index) in unit_list" :key="index">
+						<div style="width:180px;">
+							<i class="unit--icon unit--icon-1"></i>
+							<span>{{item.unit}}</span>
+						</div>
+						<div>{{item.threat}}</div>
+						<div>{{item.vulnerability}}</div>
+					</li>
+				</ul>
+			</div>
+			<div class="unit-item unit-list--zican">
+				<div class="unit--item-title">
+					高风险资产 
+				</div>
+				<p class="unit--address"><i class="icon-address"></i>{{assets_list.unit}}</p>
+				<ul class="unit--item-list">
+					<li >
+						<!-- <div style="width:120px;">
+							单位名称
+						</div> -->
+						<div style="width:180px;">
+							资产IP
+						</div>
+						<div>
+							受威胁数
+						</div>
+						<div>
+							漏洞数
+						</div>
+					</li>
+					<li  v-for="(item,index) in assets_list.asset" :key="index">
+						<div style="width:180px;">
+							<i class="unit--icon unit--icon-2"></i>
+							<span>{{item.ip}}</span>
+						</div>
+						<!-- <div> 
+							<span>单位</span>
+						</div> -->
+						<div>{{item.threat}}</div>
+						<div>{{item.vulnerability}}</div>
+					</li>
+				</ul>
 			</div>
 		</div>
-		<!-- 底部 -->
+	 
 		<div class="cbottom" v-show="show_state==0">
 			<div class="cbottom-his" @click="updateState(1)">
 				<!-- title -->
@@ -76,7 +264,8 @@
 					<div class="item-title item-step">攻击步骤</div>
 					<div class="item-content" id="list-content">
 						<div class="cdivscontent">
-							<div class="steps cur animated fadeInUp"  v-for="(item,index) in show_items.step" :key="index">
+							<div class="steps cur animated fadeInRight"  @click="scrollStep(index)" v-for="(item,index) in show_items.step"
+								:key="index">
 								<span class="stepsnum">{{index+1}}</span>
 								{{item.name}}
 							</div>
@@ -119,7 +308,7 @@
 			<div class="cleft-list" id="scorll">
 				<!-- <p  class="notdata">暂无数据</p> -->
 				<ul>
-					<li v-for="(item,index) in threat_items" :class="select_index==index?'active':''" :key="item._id">
+					<li  v-for="(item,index) in threat_items" :class="select_index==index?'active':''" :key="item._id">
 						<div>{{item.date}}</div>
 						<div>{{item.type}}</div>
 					</li>
@@ -127,16 +316,20 @@
 			</div>
 
 		</div>
-		<img src="../../assets/images/play.png" @click="playEvenet(false)" v-if="is_play&&show_play" class="playPosition">
+		<img src="../../assets/images/play.png" @click="playEvenet(false)" v-if="is_play&&show_play"
+			class="playPosition">
 		<!-- 暂停 -->
-		<img src="../../assets/images/out.png" @click="playEvenet(true)" v-if="!is_play&&show_play" class="playPosition">
+		<img src="../../assets/images/out.png" @click="playEvenet(true)" v-if="!is_play&&show_play"
+			class="playPosition">
 		<!-- 滚动播放 -->
-		<div class="info-list" v-show="show_state==0&&show_items.step.length!=0">
-			<span class="infotablist" v-show="show_items.step.length==show_items.list.length" @click="is_expand=!is_expand">{{is_expand?'》':'《'}}</span>
-			<div id="infos" class="info-items info-itemsbakc" :style="{'width':is_expand?'1150px':''}">
+		<div class="info-list info-itemsbakc" v-show="show_state==0&&show_items.step.length!=0" :style="{'padding-left':show_items.step.length==show_items.list.length?'35px':'0px'}">
+			<span class="infotablist" v-show="show_items.step.length==show_items.list.length"
+				@click="expandEvent">{{is_expand?'》':'《'}}</span>
+			<div id="infos" class="info-items " :style="{'width':is_expand?'1150px':''}">
 				<div class="infobox">
 					<!--  -->
-					<div :key="index" v-for="(item,index) in show_items.step.length" :class="index==0?'animated fadeIn':''" class="infoitem ">
+					<div :key="index" v-for="(item,index) in show_items.step.length"
+						:class="index==0?'animated fadeIn':''" class="infoitem ">
 						<div class="infotitle text-over">
 							<span class="infotitleindex">{{index+1}}</span>
 							<span class="infotitlet">{{show_items.list[index].name}}</span>
@@ -144,7 +337,7 @@
 						<ul class="infolists">
 							<li>
 								<span>时间</span> <span>{{show_items.list[index].time}}</span>
-							</li> 
+							</li>
 							<li>
 								<span>源IP</span> <span>{{show_items.list[index].src}}</span>
 							</li>
