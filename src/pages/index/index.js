@@ -42,7 +42,19 @@ let VM = new Vue({
             unit_list:[],
             assets_list:{},
             unit_assets_inter:null,
+            unit_class:"",
+            assets_class:"",
+            assets_index:0,
+            assets_interval:null,
+            assets_watch:0
             
+        }
+    },
+    watch:{
+        assets_watch(val){
+            if(val!=0){ 
+                    this.inter_statis() 
+            }
         }
     },
     created() {
@@ -115,70 +127,67 @@ let VM = new Vue({
                 //通道关闭了
                 if (this.ws.readyState == 3) {
                     setTimeout(()=>{ 
-                        this.socket();
+                        this.socket(func());
                     },5000)
                 }
             };
             
+        },
+        inter_statis(){
+            clearInterval(this.assets_interval)
+            let set_data = (data) => {
+                this.assets_class = "animated flipInX"
+                this.assets_list = data;
+                setTimeout(() => {
+                    this.assets_class = ""
+                }, 2000)
+            }
+            set_data(this.unit_list[0])
+            this.assets_index++
+            this.assets_interval = setInterval(()=>{
+                if (this.assets_index >= this.unit_list.length) {
+                    this.assets_index = 0
+                } 
+                let data = this.unit_list[this.assets_index];
+                set_data(data)
+                this.assets_index++
+            },6000)
         },
         microStatistics(func) {
             this.ws = new WebSocket(`ws://172.18.0.23/${query.city}/api/websocket/microStatistics`);
             this.ws.onopen = () => { 
                 this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() })) 
                 typeof func =='function'?func():'';
+                
             };
             this.ws.onmessage = e => {
                 if (e.data === "Connect micro situation successful") return;
                 let data = JSON.parse(e.data);
                 this.unit_list = data.statistics;
-                let index = 1;
+                this.assets_watch = this.unit_list.length
+
+                this.unit_class = "animated flipInX" 
+                setTimeout(() => {
+                    this.unit_class = ""
+                }, 2000)
+                /* let index = 1;
                 clearInterval(this.unit_assets_inter)
                 let _this = this;
                 let set_data=(data)=> {
-                    _this.assets_list = data
+                    this.assets_class = "animated flipInX" 
+                    _this.assets_list = data;
+                    setTimeout(()=>{
+                        this.assets_class = ""
+                    },5000)
                 }
-                set_data({
-                    "unit": "鹏城西城分行对公营销部",
-                    "threat": "145",
-                    "vulnerability": "38",
-                    "asset": [
-                        {
-                            "ip": "192.168.104.45",
-                            "threat": "82",
-                            "vulnerability": "21"
-                        },
-                        {
-                            "ip": "192.168.104.81",
-                            "threat": "63",
-                            "vulnerability": "17"
-                        }
-                    ]
-                })
+                set_data(this.unit_list[0]) 
                 this.unit_assets_inter = setInterval(x=>{
                     if (index>=this.unit_list.length){
                         index = 0
-                    } 
-                    
-                    // this.assets_list = this.unit_list[index];
-                    set_data({
-                        "unit": "鹏城西城分行对公营销部",
-                        "threat": "145",
-                        "vulnerability": "38",
-                        "asset": [
-                            {
-                                "ip": "192.168.104.45",
-                                "threat": "82",
-                                "vulnerability": "21"
-                            },
-                            {
-                                "ip": "192.168.104.81",
-                                "threat": "63",
-                                "vulnerability": "17"
-                            }
-                        ]
-                    })
+                    }   
+                    set_data(this.unit_list[index])
                     index++
-                },3000)
+                },6000) */
                 
                 
             }

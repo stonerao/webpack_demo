@@ -435,11 +435,11 @@ class City extends Base {
             addSatellite() {
                 var material = new THREE.MeshPhongMaterial({ color: 0x999999 });
                 var mtlLoader = new THREE.MTLLoader();
-                mtlLoader.load('../assets/model/satellite.mtl', function (materials) {
+                mtlLoader.load('/assets/model/satellite.mtl', function (materials) {
                     materials.preload();
                     var objLoader = new THREE.OBJLoader();
                     objLoader.setMaterials(materials);
-                    objLoader.load('../assets/model/satellite.obj', function (mesh) {
+                    objLoader.load('/assets/model/satellite.obj', function (mesh) {
                         mesh.traverse(function (node) {
                             if (node instanceof THREE.Mesh) {
                                 node.castShadow = true;
@@ -459,11 +459,11 @@ class City extends Base {
             createCity() {
                
                 var mtlLoader = new THREE.MTLLoader();
-                mtlLoader.load('../assets/model/city.mtl', function (materials) {
+                mtlLoader.load('/assets/model/city.mtl', function (materials) {
                     materials.preload();
                     var objLoader = new THREE.OBJLoader();
                     objLoader.setMaterials(materials);
-                    objLoader.load('../assets/model/city.obj', function (mesh) { 
+                    objLoader.load('/assets/model/city.obj', function (mesh) { 
                         mesh.traverse(function (node) {
                             if (node instanceof THREE.Mesh) {
                                 // // node.castShadow = true;

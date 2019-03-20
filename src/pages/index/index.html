@@ -35,7 +35,7 @@
 		}
 
 		.lds-roller {
-			margin-top: 30%;
+			margin-top: 25%;
 			display: inline-block;
 			position: relative;
 			width: 64px;
@@ -191,7 +191,7 @@
 							漏洞数
 						</div>
 					</li>
-					<li v-for="(item,index) in unit_list" :key="index">
+					<li :class="unit_class+` delay-${index+1}`"  v-for="(item,index) in unit_list" :key="index">
 						<div style="width:180px;">
 							<i class="unit--icon unit--icon-1"></i>
 							<span>{{item.unit}}</span>
@@ -205,8 +205,8 @@
 				<div class="unit--item-title">
 					高风险资产 
 				</div>
-				<p class="unit--address"><i class="icon-address"></i>{{assets_list.unit}}</p>
-				<ul class="unit--item-list">
+				<p class="unit--address" :class="assets_class"><i class="icon-address"></i>{{assets_list.unit}}</p>
+				<ul class="unit--item-list" >
 					<li >
 						<!-- <div style="width:120px;">
 							单位名称
@@ -221,7 +221,7 @@
 							漏洞数
 						</div>
 					</li>
-					<li  v-for="(item,index) in assets_list.asset" :key="index">
+					<li :class="assets_class+` delay-${index+1}`" v-for="(item,index) in assets_list.asset" :key="index">
 						<div style="width:180px;">
 							<i class="unit--icon unit--icon-2"></i>
 							<span>{{item.ip}}</span>
@@ -339,13 +339,13 @@
 								<span>时间</span> <span>{{show_items.list[index].time}}</span>
 							</li>
 							<li>
-								<span>源IP</span> <span>{{show_items.list[index].src}}</span>
+								<span>源IP</span> <span>{{show_items.list[index].attacker}}</span>
 							</li>
 							<li>
 								<span>源端口</span> <span>{{show_items.list[index].sport}}</span>
 							</li>
 							<li>
-								<span>目的IP</span> <span>{{show_items.list[index].dst}}</span>
+								<span>目的IP</span> <span>{{show_items.list[index].victim}}</span>
 							</li>
 							<li>
 								<span>目的端口</span> <span>{{show_items.list[index].dport}}</span>
