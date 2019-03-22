@@ -38,22 +38,23 @@ let VM = new Vue({
             title_class: "",
             list_class_quit: "",
             ws: null,
+            statsWs: null,
             test_data: {},
-            unit_list:[],
-            assets_list:{},
-            unit_assets_inter:null,
-            unit_class:"",
-            assets_class:"",
-            assets_index:0,
-            assets_interval:null,
-            assets_watch:0
-            
+            unit_list: [],
+            assets_list: {},
+            unit_assets_inter: null,
+            unit_class: "",
+            assets_class: "",
+            assets_index: 0,
+            assets_interval: null,
+            assets_watch: 0, 
+            TimeOut:null,
         }
     },
-    watch:{
-        assets_watch(val){
-            if(val!=0){ 
-                    this.inter_statis() 
+    watch: {
+        assets_watch(val) {
+            if (val != 0) {
+                this.inter_statis()
             }
         }
     },
@@ -67,24 +68,23 @@ let VM = new Vue({
             Vue: this
         })
         this.microStatistics()
-        setTimeout(()=>{
+        setTimeout(() => {
             this.load()
             document.getElementById("app").style.display = ""
             document.querySelector("body").removeChild(document.getElementById("loading"))
-        },2000)
-       
+        }, 2000)
+
     },
     methods: {
-        socket(func) {  
-            if (query.city==undefined){
+        socket(func) {
+            if (query.city == undefined) {
                 console.warn("请携带参数")
                 return
             }
             this.ws = new WebSocket(`ws://172.18.0.23/${query.city}/api/websocket/microSituation`);
-            this.ws.onopen = () => { 
+            this.ws.onopen = () => {
                 this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
-                console.log(typeof func)
-                typeof func =='function'?func():'';
+                typeof func == 'function' ? func() : '';
             };
             this.ws.onmessage = e => {
                 if (e.data === "Connect micro situation successful") return;
@@ -92,10 +92,7 @@ let VM = new Vue({
                 if (!data.kg.list) {
                     return
                 } 
-                //检测是否已有
-                let item = this.threat_items.filter(elem=>elem._id==data._id)
-                //如果有替换 负责
-             
+                
                 let obj = {
                     attachment: data.attachment || [],
                     date: data.date,
@@ -106,38 +103,57 @@ let VM = new Vue({
                     id: data.kg.id,
                     _id: data._id
                 }
-                if(item.length!=0){ 
-                    for(let i=0;i<this.threat_items.length;i++){
-                        if(this.threat_items[i]._id==data._id)
-                        {
-                            this.threat_items[i] = obj
+                // 
+               
+                switch (data.model) {
+                    case "0":
+                        //正常加入 
+                        //如果有替换 负责 //检测是否已有
+                        let item = this.threat_items.filter(elem => elem._id == data._id)
+                        if (item.length != 0) {
+                            for (let i = 0; i < this.threat_items.length; i++) {
+                                if (this.threat_items[i]._id == data._id) {
+                                    this.threat_items[i] = obj
+                                }
+                            }
+                        } else {
+                            this.threat_items.unshift(obj)
                         }
-                    }
-                }else{ 
-                    this.threat_items.unshift(obj)
-                }
-                if (this.select_index < this.threat_items.length - 1) {
-                    this.select_index++;
-                }
-                if (this.threat_items.length > this.select_threat) {
-                    this.threat_items.pop()
+                        if (this.select_index < this.threat_items.length - 1) {
+                            this.select_index++;
+                        }
+                        if (this.threat_items.length > this.select_threat) {
+                            this.threat_items.pop()
+                        }
+                        if (this.threat_items.length == 1) {
+                            this.createGroup()
+                        }
+                        break;
+                    case "1": 
+                        console.log(obj)
+                        if (this.threat_items.length > this.select_threat) {
+                            this.threat_items.pop()
+                        }
+                        this.threat_items.splice(this.select_index, 0, obj)
+                        this.createGroup(100)
+                        break;
+
                 } 
-                if (this.threat_items.length==1){
-                    this.createGroup()
-                }
+               
+               
             }
             this.ws.onerror = e => { };
             this.ws.onclose = () => {
                 //通道关闭了
                 if (this.ws.readyState == 3) {
-                    setTimeout(()=>{ 
+                    setTimeout(() => {
                         this.socket(func());
-                    },5000)
+                    }, 5000)
                 }
             };
-            
+
         },
-        inter_statis(){
+        inter_statis() {
             clearInterval(this.assets_interval)
             let set_data = (data) => {
                 this.assets_class = "animated flipInX"
@@ -148,33 +164,33 @@ let VM = new Vue({
             }
             set_data(this.unit_list[0])
             this.assets_index++
-            this.assets_interval = setInterval(()=>{
+            this.assets_interval = setInterval(() => {
                 if (this.assets_index >= this.unit_list.length) {
                     this.assets_index = 0
-                } 
+                }
                 let data = this.unit_list[this.assets_index];
                 set_data(data)
                 this.assets_index++
-            },6000)
+            }, 6000)
         },
         microStatistics(func) {
             if (query.city == undefined) {
                 console.warn("请携带参数")
                 return
             }
-            this.ws = new WebSocket(`ws://172.18.0.23/${query.city}/api/websocket/microStatistics`);
-            this.ws.onopen = () => { 
-                this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() })) 
-                typeof func =='function'?func():'';
-                
+            this.statsWs = new WebSocket(`ws://172.18.0.23/${query.city}/api/websocket/microStatistics`);
+            this.statsWs.onopen = () => {
+                this.statsWs.send(JSON.stringify({ "unitId": this.unitId.toString() }))
+                typeof func == 'function' ? func() : '';
+
             };
-            this.ws.onmessage = e => {
+            this.statsWs.onmessage = e => {
                 if (e.data === "Connect micro situation successful") return;
                 let data = JSON.parse(e.data);
                 this.unit_list = data.statistics;
                 this.assets_watch = this.unit_list.length
 
-                this.unit_class = "animated flipInX" 
+                this.unit_class = "animated flipInX"
                 setTimeout(() => {
                     this.unit_class = ""
                 }, 2000)
@@ -196,75 +212,79 @@ let VM = new Vue({
                     set_data(this.unit_list[index])
                     index++
                 },6000) */
-                
-                
+
+
             }
-            this.ws.onerror = e => { };
-            this.ws.onclose = () => {
+            this.statsWs.onerror = e => { };
+            this.statsWs.onclose = () => {
                 //通道关闭了
-                if (this.ws.readyState == 3) {
-                    setTimeout(()=>{ 
+                if (this.statsWs.readyState == 3) {
+                    setTimeout(() => {
                         this.microStatistics();
-                    },5000)
+                    }, 5000)
                 }
             };
-            
+
         },
         load() {
             //页面加载时
             this.getThreatList(() => {
                 this.threat_scroll = initScroll("#scorll");
                 this.infos_scroll = initScroll("#infos", "x");
-                this.content_scroll = initScroll("#list-content", "x"); 
-                 this.socket(()=>{
+                this.content_scroll = initScroll("#list-content", "x");
+                this.socket(() => {
                     this.createGroup()
-                })  
+                })
             })
         },
-        expandEvent(){
+        expandEvent() {
             //滑动模块点击 
 
-            if (this.is_expand){
+            if (this.is_expand) {
                 //展开  
-                this.playEvenet(false) 
-               
-            }else{
+                this.playEvenet(false)
+
+            } else {
                 this.is_expand = true;
                 this.playEvenet(true)
-                
-                    document.querySelector("#infos").scrollLeft = 0;
-                  
+
+                document.querySelector("#infos").scrollLeft = 0;
+
             }
             // this.is_expand = !this.is_expand;
         },
-        scrollStep(index){
+        scrollStep(index) {
             //滑动到当前模块
-            if(!this.is_expand){
+            if (!this.is_expand) {
                 return
             }
             let dom = document.querySelector("#infos");
             let scorll = dom.scrollLeft;
             let src = {
                 scroll: scorll
-            } 
+            }
             _animated(src, { scroll: index * 250 }, 1000, () => {
 
                 dom.scrollLeft = src.scroll
             })
         },
-        createGroup() {
+        createGroup(state) {
+            /**
+             * state==100 播完暂停
+             * 
+             */
             //开始运行  
             if (this.select_index >= this.threat_items.length) {
                 this.select_index = 0;
             }
-            if (this.threat_items.length == 0) return;  
+            if (this.threat_items.length == 0) return;
             this.title_class = ""
             let item = this.show_items = this.threat_items[this.select_index];
             setTimeout(() => {
                 this.title_class = "animated fadeInUp opacity1"
             }, 50)
             //设置默认参数
-        
+
             this.is_expand = false
             item.step = [];
             this._city.state.deleteStep()
@@ -273,42 +293,60 @@ let VM = new Vue({
             if (this.interval) {
                 clearInterval(this.interval)
             }
-            if(this.ws){ 
-                if (query.graph == "1506" && item._id) { 
+            clearTimeout(this.TimeOut)
+            if (this.ws) {
+                if (query.graph == "1506" && item._id) {
                     this.ws.send(JSON.stringify({
-                        mongoId:  item._id.toString() 
+                        mongoId: item._id.toString()
                     }))
                 }
             }
             let dom = document.querySelector("#infos");
+            let domContent = document.querySelector("#list-content");
             const startStep = () => {
                 //如果满足 取消定时器
                 if (index >= item.list.length) {
                     clearInterval(this.interval)
-                    setTimeout(() => {
-                        if (!this.is_play){
-                            this.select_index++; 
+                    if (state== 100)
+                    {
+                        this.playEvenet(true)
+                        return
+                    }
+                    this.TimeOut = setTimeout(() => {
+                        if (!this.is_play) {
+                            this.select_index++;
                             this.createGroup()
                         }
-                    }, 3000)
+                    }, 5000)
                     return
                 }
                 item.step.push(item.list[index])
                 //给THREE 传递需要展示信息
                 this._city.attack_step(item.list, index)
+
+
                 setTimeout(() => {
+                    let stepsDoms = document.querySelectorAll(".steps")
+                    let last_step = stepsDoms[stepsDoms.length - 1]
+
+                    let ItemDoms = document.querySelectorAll(".infoitem")
+                    let last_item = ItemDoms[ItemDoms.length - 1]
                     //滑动
                     this.infos_scroll.update()
                     // dom.scrollLeft = index * 250 
                     let source = {
-                        left: dom.scrollLeft
+                        left: dom.scrollLeft,
+                        step: domContent.scrollLeft
                     }
                     let target = {
-                        left: dom.scrollLeft + 250
+                        left: dom.scrollLeft + last_item.offsetWidth,
+                        step: domContent.scrollLeft + last_step.offsetWidth
                     }
                     _animated(source, target, 1000, () => {
                         dom.scrollLeft = source.left
+                        domContent.scrollLeft = source.step
                     })
+
                     index++
                 })
             }
@@ -338,27 +376,13 @@ let VM = new Vue({
                 return
             }
             axios(`/${query.city}/api/microSituation/getUnitThreatList`, {
-            // axios(`/hy/get_threat/?unit_id=all&amount=10`, {
-               params: {
+                // axios(`/hy/get_threat/?unit_id=all&amount=10`, {
+                params: {
                     unitId: this.unitId,
                     amount: this.select_threat
-                }    
-            }).then(res => {
-                /* let index = 0;
-                this.threat_items = []
-                while (index < res.length) {
-                    let item = res[index]
-                    this.threat_items.push({
-                        attachment: item.attachment,
-                        date: item.date,
-                        type: item.kg.name,
-                        list: item.kg.list,
-                        step: [],
-                        _id: item._id
-                    })
-                    index++;
                 }
-                console.log(this.threat_items) */
+            }).then(res => {
+
                 if (res.ret_code !== 0) {
                     return false
                 }
@@ -376,12 +400,12 @@ let VM = new Vue({
                         date: item.date,
                         type: item.kg.name,
                         list: item.kg.list,
-                        step: [],  
-                        _id:item._id
+                        step: [],
+                        _id: item._id
                     })
                     index++;
                 }
- 
+
                 typeof func == "function" ? func() : '';
             })
         },

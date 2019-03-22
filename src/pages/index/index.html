@@ -193,7 +193,7 @@
 					</li>
 					<li :class="unit_class+` delay-${index+1}`"  v-for="(item,index) in unit_list" :key="index">
 						<div style="width:180px;">
-							<i class="unit--icon unit--icon-1"></i>
+							<i class="unit--icon unit--icon-2"></i>
 							<span>{{item.unit}}</span>
 						</div>
 						<div>{{item.threat}}</div>
@@ -223,7 +223,7 @@
 					</li>
 					<li :class="assets_class+` delay-${index+1}`" v-for="(item,index) in assets_list.asset" :key="index">
 						<div style="width:180px;">
-							<i class="unit--icon unit--icon-2"></i>
+							<i class="unit--icon unit--icon-1"></i>
 							<span>{{item.ip}}</span>
 						</div>
 						<!-- <div> 
@@ -321,7 +321,7 @@
 		<img src="../../assets/images/out.png" @click="playEvenet(true)" v-if="!is_play&&show_play"
 			class="playPosition">
 		<!-- 滚动播放 -->
-		<div class="info-list info-itemsbakc" v-show="show_state==0&&show_items.step.length!=0" :style="{'padding-left':show_items.step.length==show_items.list.length?'35px':'0px'}">
+		<div class="info-list info-itemsbakc" v-show="show_state==0&&show_items.step.length!=0" :style="{'padding-left':show_items.step.length==show_items.list.length?'50px':'0px'}">
 			<span class="infotablist" v-show="show_items.step.length==show_items.list.length"
 				@click="expandEvent">{{is_expand?'》':'《'}}</span>
 			<div id="infos" class="info-items " :style="{'width':is_expand?'1150px':''}">

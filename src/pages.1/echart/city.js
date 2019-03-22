@@ -1,10 +1,7 @@
 // import geo from '../../json/test.json'
-import china from './china'
-import * as d3 from 'd3'
-import Base from '../../utils/base'
-import IMG from '../../assets/map/earth.jpg'
-import ALL_POSITION from '../../json/position'
-console.log(ALL_POSITION)
+import china from './china' 
+import Base from '../../utils/base' 
+import ALL_POSITION from '../../json/position' 
 /* china.features.forEach((z,i)=>{
     z.properties = {
         name: z.properties.name,
@@ -216,14 +213,7 @@ class City extends Base {
                 state.earthInital()
  
 
-                /*   var globeTextureLoader = new THREE.TextureLoader();
-                  globeTextureLoader.load('../../assets/map/earth.jpg', function (texture) {
-                      var globeGgeometry = new THREE.SphereGeometry(190, 36, 36);
-                      var globeMaterial = new THREE.MeshStandardMaterial({ map: texture });
-                      var globeMesh = new THREE.Mesh(globeGgeometry, globeMaterial);
-                      state.scene.add(globeMesh);
-                     
-                  }); */
+                
             },
             earthInital() {
                 /*   var hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x333333, 2);
