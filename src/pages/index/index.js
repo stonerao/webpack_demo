@@ -75,7 +75,11 @@ let VM = new Vue({
        
     },
     methods: {
-        socket(func) {
+        socket(func) {  
+            if (query.city==undefined){
+                console.warn("请携带参数")
+                return
+            }
             this.ws = new WebSocket(`ws://172.18.0.23/${query.city}/api/websocket/microSituation`);
             this.ws.onopen = () => { 
                 this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() }))
@@ -154,6 +158,10 @@ let VM = new Vue({
             },6000)
         },
         microStatistics(func) {
+            if (query.city == undefined) {
+                console.warn("请携带参数")
+                return
+            }
             this.ws = new WebSocket(`ws://172.18.0.23/${query.city}/api/websocket/microStatistics`);
             this.ws.onopen = () => { 
                 this.ws.send(JSON.stringify({ "unitId": this.unitId.toString() })) 
@@ -325,6 +333,10 @@ let VM = new Vue({
             this.is_play = state
         },
         getThreatList(func) {
+            if (query.city == undefined) {
+                console.warn("请携带参数")
+                return
+            }
             axios(`/${query.city}/api/microSituation/getUnitThreatList`, {
             // axios(`/hy/get_threat/?unit_id=all&amount=10`, {
                params: {

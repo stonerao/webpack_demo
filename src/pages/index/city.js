@@ -122,7 +122,7 @@ class City extends Base {
                 state.renderer = new THREE.WebGLRenderer({
                     canvas: state.dom
                 });
-                state.renderer.setClearColor(0x000f1c, 1.0);
+                state.renderer.setClearColor(0x04060E, 1.0);
                 state.renderer.setSize(state.width, state.height);
                 // state.renderer.shadowMapEnabled = true;//开启阴影，加上阴影渲染
                 state.scene = new THREE.Scene()
