@@ -5,7 +5,8 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>网络安全威胁回放</title>
-	<script src="./assets/js/three.min.js"></script>
+	<script type="text/javascript" src="./assets/js/three.min.js"></script>
+	<script type="text/javascript" src="./assets/js/WebGL.js"></script>
 	<script type="text/javascript" src="./assets/js/OrbitControls.js"></script>
 	<script type="text/javascript" src="./assets/js/ColladaLoader.js"></script>
 	<script type="text/javascript" src="./assets/js/MTLLoader.js"></script>
@@ -172,7 +173,7 @@
 			</div>
 			<div class="map-t-r mb"></div>
 		</div> -->
-		
+
 		<!-- 底部 -->
 		<div class="unit-list ">
 			<div class="unit-item unit-list--unit">
@@ -180,8 +181,8 @@
 					高风险单位
 				</div>
 				<ul class="unit--item-list">
-					<li >
-						<div style="width:180px;"> 
+					<li>
+						<div style="width:180px;">
 							单位名称
 						</div>
 						<div>
@@ -191,7 +192,7 @@
 							漏洞数
 						</div>
 					</li>
-					<li :class="unit_class+` delay-${index+1}`"  v-for="(item,index) in unit_list" :key="index">
+					<li :class="unit_class+` delay-${index+1}`" v-for="(item,index) in unit_list" :key="index">
 						<div style="width:180px;">
 							<i class="unit--icon unit--icon-2"></i>
 							<span>{{item.unit}}</span>
@@ -203,11 +204,11 @@
 			</div>
 			<div class="unit-item unit-list--zican">
 				<div class="unit--item-title">
-					高风险资产 
+					高风险资产
 				</div>
 				<p class="unit--address" :class="assets_class"><i class="icon-address"></i>{{assets_list.unit}}</p>
-				<ul class="unit--item-list" >
-					<li >
+				<ul class="unit--item-list">
+					<li>
 						<!-- <div style="width:120px;">
 							单位名称
 						</div> -->
@@ -221,7 +222,8 @@
 							漏洞数
 						</div>
 					</li>
-					<li :class="assets_class+` delay-${index+1}`" v-for="(item,index) in assets_list.asset" :key="index">
+					<li :class="assets_class+` delay-${index+1}`" v-for="(item,index) in assets_list.asset"
+						:key="index">
 						<div style="width:180px;">
 							<i class="unit--icon unit--icon-1"></i>
 							<span>{{item.ip}}</span>
@@ -234,7 +236,7 @@
 					</li>
 				</ul>
 			</div>
-		</div> 
+		</div>
 		<div class="cbottom" v-show="show_state==0">
 			<div class="cbottom-his" @click="updateState(1)">
 				<!-- title -->
@@ -263,8 +265,8 @@
 					<div class="item-title item-step">攻击步骤</div>
 					<div class="item-content" id="list-content">
 						<div class="cdivscontent">
-							<div class="steps cur animated fadeInRight"  @click="scrollStep(index)" v-for="(item,index) in show_items.step"
-								:key="index">
+							<div class="steps cur animated fadeInRight" @click="scrollStep(index)"
+								v-for="(item,index) in show_items.step" :key="index">
 								<span class="stepsnum">{{index+1}}</span>
 								{{item.name}}
 							</div>
@@ -307,7 +309,7 @@
 			<div class="cleft-list" id="scorll">
 				<!-- <p  class="notdata">暂无数据</p> -->
 				<ul>
-					<li  v-for="(item,index) in threat_items" :class="select_index==index?'active':''" :key="item._id">
+					<li v-for="(item,index) in threat_items" :class="select_index==index?'active':''" :key="index">
 						<div>{{item.date}}</div>
 						<div>{{item.type}}</div>
 					</li>
@@ -321,7 +323,8 @@
 		<img src="../../assets/images/out.png" @click="playEvenet(true)" v-if="!is_play&&show_play"
 			class="playPosition">
 		<!-- 滚动播放 -->
-		<div class="info-list info-itemsbakc" v-show="show_state==0&&show_items.step.length!=0" :style="{'padding-left':show_items.step.length==show_items.list.length?'50px':'0px'}">
+		<div class="info-list " :class="is_expand?'info-itemsbakc':''" v-show="show_state==0&&show_items.step.length!=0"
+			:style="{'padding-left':show_items.step.length==show_items.list.length?'50px':'0px'}">
 			<span class="infotablist" v-show="show_items.step.length==show_items.list.length"
 				@click="expandEvent">{{is_expand?'》':'《'}}</span>
 			<div id="infos" class="info-items " :style="{'width':is_expand?'1150px':''}">
@@ -358,7 +361,30 @@
 			</div>
 		</div>
 		<div class="alert-model">
-			
+
+		</div>
+		<div class="unit-warn unit-amimation" id="warnUnit" v-if="unit_animation_info.show">
+			<div class="warn--icon">
+				<img src="../../assets/images/warn-icon.png" alt="">
+			</div>
+			<div>
+				<p class="unit--color" style="margin-top:2px;">
+					正在播放:
+				</p>
+				<p class="unit--time unit--font">
+				  {{unit_animation_info.time}}
+				</p>
+				
+				<p>
+					<span class="unit--font">
+						{{unit_animation_info.type}}
+					</span>
+					<span class="unit-hui">
+						{{unit_animation_info.state}}
+					</span>
+				</p>
+				
+			</div>
 		</div>
 	</div>
 
