@@ -57,7 +57,8 @@ let VM = new Vue({
                 state: ""
             },
             unit_animation_time: null,
-            ZAN_PLAY_TIME: null
+            ZAN_PLAY_TIME: null,
+            folding:false
         }
     },
     watch: {
@@ -105,8 +106,7 @@ let VM = new Vue({
                 let data = JSON.parse(e.data);
                 if (!data.kg.list) {
                     return
-                }
-
+                } 
                 let obj = {
                     attachment: data.attachment || [],
                     date: data.date,
@@ -142,7 +142,7 @@ let VM = new Vue({
                             this.createGroup()
                         }
                         break;
-                    case "1":
+                    case "1": 
                         if (this.threat_items.length > this.select_threat) {
                             this.threat_items.pop()
                         }

@@ -116,13 +116,13 @@ class City extends Base {
         var SELECT_IMG_NEW = new Image()
         SELECT_IMG_NEW.src = "./assets/images/select_city1.png"
         let SELECT_IMG = SELECT_IMG_NEW
-        state.SATELILITE_POSITION = [0, 1500, 0]//卫星位置
+        state.SATELILITE_POSITION = [0, 1450, 0]//卫星位置
 
 
-        return {
-
+        return { 
             initial() {
                 state.dom = document.getElementById(state.id)
+                //webgl2
                 // var context = state.dom.getContext('webgl2');
                 state.renderer = new THREE.WebGLRenderer({
                     canvas: state.dom,
@@ -487,11 +487,11 @@ class City extends Base {
             addSatellite() {
                 var material = new THREE.MeshPhongMaterial({ color: 0x999999 });
                 var mtlLoader = new THREE.MTLLoader();
-                mtlLoader.load('/assets/model/satellite.mtl', function (materials) {
-                    materials.preload();
+             /*    mtlLoader.load('/assets/model/satellite.mtl', function (materials) {
+                    materials.preload(); */
                     var objLoader = new THREE.OBJLoader();
-                    objLoader.setMaterials(materials);
-                    objLoader.load('/assets/model/satellite.obj', function (mesh) {
+                    // objLoader.setMaterials(materials);
+                    objLoader.load('/assets/model/cloud.obj', function (mesh) {
                         mesh.traverse(function (node) {
                             if (node instanceof THREE.Mesh) {
                                 node.castShadow = true;
@@ -501,11 +501,14 @@ class City extends Base {
                         });
                         mesh.position.set(state.SATELILITE_POSITION[0], state.SATELILITE_POSITION[1], state.SATELILITE_POSITION[2])
                         state.scene.add(mesh)
+                        mesh.scale.x = 0.4
+                        mesh.scale.y = 0.4
+                        mesh.scale.z = 0.4
                         setInterval(() => {
                             mesh.rotation.y += 0.01
                         }, 20)
                     });
-                });
+             /*    }); */
 
             },
             createCity() {

@@ -5,6 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>网络安全威胁回放</title>
+	<link rel="stylesheet" href="./assets/styles/loading.css">
 	<script type="text/javascript" src="./assets/js/three.min.js"></script>
 	<script type="text/javascript" src="./assets/js/WebGL.js"></script>
 	<script type="text/javascript" src="./assets/js/OrbitControls.js"></script>
@@ -140,6 +141,8 @@
 				transform: rotate(360deg);
 			}
 		}
+
+		
 	</style>
 </head>
 
@@ -175,6 +178,16 @@
 		</div> -->
 
 		<!-- 底部 -->
+		<div class="sk-folding-box" v-if="folding">
+			<div class="sk-folding-cube" style="z-index:10000">
+				<div class="sk-cube1 sk-cube"></div>
+				<div class="sk-cube2 sk-cube"></div>
+				<div class="sk-cube4 sk-cube"></div>
+				<div class="sk-cube3 sk-cube"></div>
+			</div>
+			<div class="sk-folding-fonts">未检出威胁</div>
+		</div>
+
 		<div class="unit-list ">
 			<div class="unit-item unit-list--unit">
 				<div class="unit--item-title">
@@ -363,27 +376,26 @@
 		<div class="alert-model">
 
 		</div>
+		<!-- -->
 		<div class="unit-warn unit-amimation" id="warnUnit" v-if="unit_animation_info.show">
 			<div class="warn--icon">
 				<img src="../../assets/images/warn-icon.png" alt="">
 			</div>
 			<div>
 				<p class="unit--color" style="margin-top:2px;">
-					正在播放:
+					正在回放:
 				</p>
-				<p class="unit--time unit--font">
-				  {{unit_animation_info.time}}
-				</p>
-				
-				<p>
+				<p class="unit--t">
 					<span class="unit--font">
 						{{unit_animation_info.type}}
 					</span>
-					<span class="unit-hui">
+					<!-- <span class="unit-hui">
 						{{unit_animation_info.state}}
-					</span>
+					</span> -->
 				</p>
-				
+				<p class="unit--time">
+					{{unit_animation_info.time}}
+				</p>
 			</div>
 		</div>
 	</div>
