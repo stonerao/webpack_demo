@@ -3,6 +3,26 @@
  * THREE
  * stonerao 
  */
+function _animated(source, target, time, func, endFunc) {
+    /**
+     * @source 起始数据
+     * @target 结束数据
+     * @time 持续时间
+     * @fun 持续中的事件
+     * @endFunc 完成触发的事件
+     */
+    createjs.Tween.get(source).to(target, time, createjs.Ease.quadInOut)
+        .call(handleChange)
+    var Time = setInterval(() => {
+        typeof func == 'function' ? func() : null;
+    })
+
+    function handleChange(event) {
+        //完成 
+        clearInterval(Time);
+        typeof endFunc == 'function' ? endFunc() : null;
+    }
+}
 function GL() {
     let _prototype = GL.prototype;
     let camera, scene, renderer;
@@ -10,6 +30,7 @@ function GL() {
     let [width, height] = [window.innerWidth, window.innerHeight]
     let controls;
     let stats;
+    let rotation;
     _prototype.init = () => {
         dom.width = width;
         dom.height = height;
@@ -46,6 +67,9 @@ function GL() {
         //辅助线
         let gridHelper = new THREE.GridHelper(10000, 200);
         scene.add(gridHelper);
+
+        let ambient = new THREE.AmbientLight(0xffffff); // soft white light
+        scene.add(ambient);
     }
     _prototype.initControls = () => {
         /* 创建鼠标事件 */
@@ -76,42 +100,66 @@ function GL() {
     _prototype.initTestBox = () => {
         //测试10W以上盒子性能
         const random = () => {
-            let number = Math.random() * 1000;
+            let number = Math.random() * 5000;
             return Math.random() < 0.5 ? 0 - number : number
         }
-        /*  FPS 10-15
-         let index = 0
-          // geometry 比material 慢  
-          var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-          var geometry = new THREE.BoxGeometry(1, 1, 1);
-          while (index < 100000) { 
-              var cube = new THREE.Mesh(geometry, material);
-              scene.add(cube);
-              cube.position.set(random(), random(), random())
-              index++;
-        } */
-        var contain = new THREE.Object3D();
-        let index = 0; 
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        var geometry = new THREE.BoxGeometry(1, 1, 1);
-        while(index<100000){
-            var cube = new THREE.Mesh(geometry, material);
-            // scene.add(cube);
-            contain.add(cube);
-            cube.position.set(random(), random(), random())
-            index++;
+        var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        function addCube() {
+            var geometry = new THREE.BoxGeometry(1, 1, 1);
+            var cube = new THREE.Mesh(geometry);
+            return cube
         }
-        scene.add(contain)
- 
-    }
+        var geometry = new THREE.Geometry();
+        console.time()
+        let index = 0
+        while (index < 100000) {
+            var cube = addCube(); //创建了一个随机位置的几何体模型
+            cube.position.x = random()
+            cube.position.y = random()
+            cube.position.z = random()
+            cube.updateMatrix(); //手动更新模型的矩阵
+            geometry.merge(cube.geometry, cube.matrix); //将几何体合并
+            index++
+        }
+      
+        scene.add(new THREE.Mesh(geometry, material));
+        
 
+    }
+    _prototype.testCircle = () => {
+        var earthGeometry = new THREE.SphereGeometry(199, 36, 36);
+        new THREE.TextureLoader().load("/assets/map/earth4.jpg", function (img) {
+            var earthMaterial = new THREE.MeshPhongMaterial({
+                map: img,
+                shininess: 40,
+                bumpScale: 1,
+                // map: earth_texture,
+                /*  bumpMap: earth_bump,
+                 specularMap: earth_specular, */
+            });
+            var earth = new THREE.Mesh(earthGeometry, earthMaterial);
+            earth.material.transparent = true;
+            earth.material.color.set(0xffffff)
+            scene.add(earth)
+            let src = {
+                scale: 1
+            }
+            _animated(src, { scale: 0.5 },2000,function(){ 
+                earth.scale.x = src.scale
+                earth.scale.y = src.scale
+                earth.scale.z = src.scale
+            })
+           
+        });
+    }
     _prototype.load = () => {
         this.init();
         this.createGrid()
         this.stats()
-        this.initControls() 
-        this.initTestBox() 
-
+        this.initControls()
+        // this.initTestBox()
+        // 
+        this.testCircle()
         //
         this.animationFrame();
     }
