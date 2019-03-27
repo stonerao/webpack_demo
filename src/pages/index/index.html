@@ -165,7 +165,7 @@
 			网络安全威胁回放
 		</div>
 		<div class="title-small">
-			Playback of Cyber-security Threats
+			Replay of Network Security Threats
 		</div>
 	</div>
 	<div class="full" id="main">
@@ -196,6 +196,9 @@
 				<div class="unit--item-title">
 					高风险单位
 				</div>
+				<p class="en-small">
+					Theat Type TOP5 
+				</p>
 				<ul class="unit--item-list">
 					<li>
 						<div style="width:180px;">
@@ -204,9 +207,9 @@
 						<div>
 							受威胁数
 						</div>
-						<div>
+						<!-- <div>
 							漏洞数
-						</div>
+						</div> -->
 					</li>
 					<li :class="unit_class+` delay-${index+1}`" v-for="(item,index) in unit_list" :key="index">
 						<div style="width:180px;">
@@ -214,7 +217,10 @@
 							<span>{{item.unit}}</span>
 						</div>
 						<div>{{item.threat}}</div>
-						<div>{{item.vulnerability}}</div>
+					<!-- 	<div>{{item.vulnerability}}</div> -->
+					</li>
+					<li v-if="unit_list.length==0" style="text-align:center;display:block">
+						暂无数据
 					</li>
 				</ul>
 			</div>
@@ -222,6 +228,9 @@
 				<div class="unit--item-title">
 					高风险资产
 				</div>
+				<p class="en-small">
+					Attacked Network TOP5 
+				</p>
 				<p class="unit--address" :class="assets_class"><i class="icon-address"></i>{{assets_list.unit}}</p>
 				<ul class="unit--item-list">
 					<li>
@@ -234,9 +243,12 @@
 						<div>
 							受威胁数
 						</div>
-						<div>
+						<!-- <div>
 							漏洞数
-						</div>
+						</div> -->
+					</li>
+					<li v-if="!assets_list.asset" style="text-align:center;display:block">
+						暂无数据
 					</li>
 					<li :class="assets_class+` delay-${index+1}`" v-for="(item,index) in assets_list.asset"
 						:key="index">
@@ -248,7 +260,7 @@
 							<span>单位</span>
 						</div> -->
 						<div>{{item.threat}}</div>
-						<div>{{item.vulnerability}}</div>
+						<!-- <div>{{item.vulnerability}}</div> -->
 					</li>
 				</ul>
 			</div>
@@ -268,17 +280,17 @@
 
 				</div>
 				<div class="item-box">
-					<div class="item-title item-time">时间</div>
+					<div class="item-title item-time">时间（Date）</div>
 					<div class="item-content op0" :class="title_class">{{show_items.date}}
 					</div>
 				</div>
 				<div class="item-box">
-					<div class="item-title item-type">威胁类型</div>
+					<div class="item-title item-type">威胁类型（Threat Type）</div>
 					<div class="item-content op0 text-over" :class="title_class">
 						{{show_items.type}}</div>
 				</div>
 				<div class="item-box" style="flex:1">
-					<div class="item-title item-step">攻击步骤</div>
+					<div class="item-title item-step">攻击步骤（Attack Step）</div>
 					<div class="item-content" id="list-content">
 						<div class="cdivscontent">
 							<div class="steps cur animated fadeInRight" @click="scrollStep(index)"

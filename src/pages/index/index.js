@@ -309,17 +309,18 @@ let VM = new Vue({
             //设置默认参数
 
             this.is_expand = false
-            item.step = [];
-            this._city.state.deleteStep()
+            item.step = [] 
             let index = 0;
             //清除定时器 
             if (this.interval) {
                 clearInterval(this.interval)
             }
-            clearTimeout(this.TimeOut)
-
+            clearTimeout(this.TimeOut) 
             clearTimeout(this.ZAN_PLAY_TIME)
-
+            
+          
+            
+            
             if (this.ws) {
                 if (query.graph == "1506" && item._id) {
                     this.ws.send(JSON.stringify({
@@ -381,6 +382,7 @@ let VM = new Vue({
                 })
             }
             setTimeout(() => {
+                this._city.state.deleteStep()
                 startStep()
                 this.interval = setInterval(startStep, 1500);
             })

@@ -27,6 +27,7 @@ class City extends Base {
             building_step: [],
             all_building: [],//存储所有建筑
             all_building_id: [],//存储所有建筑的ID
+            all_text:[]
         })
         this.created()
         this._cit_json = this.cloneJSON(cityPotion)
@@ -589,8 +590,15 @@ class City extends Base {
                 //线条
                 //在新的一次 
                 if (index === 1) {
-                    state.building_step = []
+                    state.building_step = []  
+                    let index = state.all_text.length
+                    while (index > state.all_text.length){
+                        state.dispose(state.all_text[index])
+                        index--
+                    }
+                    state.all_text=[]
                 }
+                
                 //在数组中添加档当次 的连线
                 let building_the = [
                     src_node ? src_node.unit_id : 0,
@@ -625,14 +633,16 @@ class City extends Base {
                 let n = 0;
                 let tim = setInterval(() => {
                     n++;
+                    
                     if (n >= cinum) {
                         //终点
                         if (dst_node) {
                             //到达终点高亮
                             state.shiny(dst_node)
                         }
-                        state.addStep([_center[0] + _LINE, _center[1], _center[2]], index, reference)
-                        state.dispose(_IMG)
+                        let text = state.addStep([_center[0] + _LINE, _center[1], _center[2]], index, reference)
+                        state.all_text.push(text)
+                        state.dispose(_IMG)  
                         clearInterval(tim)
                     } else {
                         line.advance(vector[n])
@@ -649,7 +659,7 @@ class City extends Base {
                     state.dispose(_IMG) 
                 }) */
             },
-            addStep(position, index, reference) {
+            addStep(position, index, reference) {  
                 //连线展示开始图标
                 let canvas = document.createElement('canvas');
                 let RECT_SIZE = 256; //大小
@@ -673,7 +683,8 @@ class City extends Base {
                 let sprScale = 80;
                 spriteText.scale.set(sprScale, sprScale, 1);
                 spriteText.position.set(position[0], position[1] + 70, position[2]);
-                spriteText.params_type = "step"
+                spriteText.params_type = "step" 
+                spriteText.params_num = index
                 state.scene.add(spriteText);
                 return spriteText
             },
@@ -738,8 +749,7 @@ class City extends Base {
                     }
                     index++
                 }
-                //删除
-
+                //删除 
                 nodes.filter(x => x.params_type == 'step').forEach(x => {
                     state.dispose(x)
                 })
