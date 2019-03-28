@@ -58,7 +58,7 @@ let VM = new Vue({
             },
             unit_animation_time: null,
             ZAN_PLAY_TIME: null,
-            folding:false
+            folding: false
         }
     },
     watch: {
@@ -68,8 +68,8 @@ let VM = new Vue({
             }
         }
     },
-    created() { 
-        if (WEBGL.isWebGL2Available() === false) { 
+    created() {
+        if (WEBGL.isWebGL2Available() === false) {
             document.body.appendChild(WEBGL.getWebGL2ErrorMessage());
         }
         let host = window.location.host
@@ -88,7 +88,16 @@ let VM = new Vue({
             document.getElementById("app").style.display = ""
             document.querySelector("body").removeChild(document.getElementById("loading"))
         }, 2000)
-
+        //隔段时间给socket发送信息  防止服务器认为死掉
+        let obj = JSON.stringify({ "alive": "" })
+        setInterval(() => {
+            if (this.ws) {
+                this.ws.send(obj)
+            }
+            if (this.statsWs) {
+                this.statsWs.send(obj)
+            }
+        }, 100000)
     },
     methods: {
         socket(func) {
@@ -106,7 +115,7 @@ let VM = new Vue({
                 let data = JSON.parse(e.data);
                 if (!data.kg.list) {
                     return
-                } 
+                }
                 let obj = {
                     attachment: data.attachment || [],
                     date: data.date,
@@ -142,7 +151,7 @@ let VM = new Vue({
                             this.createGroup()
                         }
                         break;
-                    case "1": 
+                    case "1":
                         if (this.threat_items.length > this.select_threat) {
                             this.threat_items.pop()
                         }
@@ -309,18 +318,18 @@ let VM = new Vue({
             //设置默认参数
 
             this.is_expand = false
-            item.step = [] 
+            item.step = []
             let index = 0;
             //清除定时器 
             if (this.interval) {
                 clearInterval(this.interval)
             }
-            clearTimeout(this.TimeOut) 
+            clearTimeout(this.TimeOut)
             clearTimeout(this.ZAN_PLAY_TIME)
-            
-          
-            
-            
+
+
+
+
             if (this.ws) {
                 if (query.graph == "1506" && item._id) {
                     this.ws.send(JSON.stringify({
@@ -338,9 +347,9 @@ let VM = new Vue({
                         //暂停10秒钟
                         let PLAY_TIME = 10000
                         this.playEvenet(true)
-                        this.ZAN_PLAY_TIME = setTimeout(() => {
+                       /*  this.ZAN_PLAY_TIME = setTimeout(() => {
                             this.playEvenet(false)
-                        }, PLAY_TIME)
+                        }, PLAY_TIME) */
                         return
                     }
                     this.TimeOut = setTimeout(() => {
@@ -397,7 +406,7 @@ let VM = new Vue({
             } else {
                 //暂停
                 clearInterval(this.interval)
-                this._city.state.quitAutoControls() 
+                this._city.state.quitAutoControls()
             }
             this.is_play = state
         },
