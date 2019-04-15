@@ -5,7 +5,7 @@ const webpackConfigBase = require('./webpack.base.conf');
 
 const webpackConfigDev = {
     mode: 'development', // 通过 mode 声明开发环境
-    
+
     output: {
         path: path.resolve(__dirname, '../dist'),
         // 打包多出口文件
@@ -21,7 +21,7 @@ const webpackConfigDev = {
     ],
 
     devtool: "source-map", // 开启调试模式
-    
+
     devServer: {
         contentBase: path.join(__dirname, "../src"),
         publicPath: '/',
@@ -33,16 +33,20 @@ const webpackConfigDev = {
         hot: true, // 开启热更新
         //服务器代理配置项
         proxy: {
-           '/hy/*': {
+            '/hy/*': {
                 target: 'http://172.18.0.23',
                 secure: true,
                 changeOrigin: true
-            }  
-           /*  '/hy/*': {
-                target: 'http://172.18.0.23:7000',
+            }, '/mnu/*': {
+                target: 'http://cszz.eelantech.com:2880/',
                 secure: true,
                 changeOrigin: true
-            } */
+            }
+            /*  '/hy/*': {
+                 target: 'http://172.18.0.23:7000',
+                 secure: true,
+                 changeOrigin: true
+             } */
         }
     },
 }

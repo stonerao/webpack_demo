@@ -27,7 +27,7 @@ class City extends Base {
             building_step: [],
             all_building: [],//存储所有建筑
             all_building_id: [],//存储所有建筑的ID
-            all_text:[]
+            all_text: []
         })
         this.created()
         this._cit_json = this.cloneJSON(cityPotion)
@@ -68,9 +68,10 @@ class City extends Base {
             color: new THREE.Color("#e17cff"),
         });
 
-        var obj_material = new THREE.MeshPhongMaterial({ color: 0x13203C });
-        var obj_material1 = new THREE.MeshPhongMaterial({ color: 0x4979D2 });
-        var obj_material2 = new THREE.MeshPhongMaterial({ color: 0xff8800 });
+        var obj_material = new THREE.MeshPhongMaterial({ color: 0x13203C, side: THREE.DoubleSide });
+        var obj_material1 = new THREE.MeshPhongMaterial({ color: 0x3863b1, side: THREE.DoubleSide });
+        var obj_material2 = new THREE.MeshPhongMaterial({ color: 0xd2b240, side: THREE.DoubleSide });
+        var obj_material3 = new THREE.MeshPhongMaterial({ color: 0x40d274, side: THREE.DoubleSide });
         //加载默认图
         var startImgs = {
             "2-1-1": "./assets/images/2-1-1.png",
@@ -120,7 +121,7 @@ class City extends Base {
         state.SATELILITE_POSITION = [0, 1450, 0]//卫星位置
 
 
-        return { 
+        return {
             initial() {
                 state.dom = document.getElementById(state.id)
                 //webgl2
@@ -141,9 +142,7 @@ class City extends Base {
                     z: -1.863393207087795
                 })
                 state.scene.add(state.camera)
-                state.load()
-
-
+                state.load() 
             },
             initControls() {
                 /* 创建鼠标事件 */
@@ -177,7 +176,7 @@ class City extends Base {
                    
                 }) */
             },
-            quitAutoControls(){ 
+            quitAutoControls() {
                 state.auto_state = false
 
             },
@@ -242,20 +241,20 @@ class City extends Base {
 
                 }
             },
-            buildingAnimation(position, radius) {
-                position[1] = 1
+            buildingAnimation(position, radius=20) {
+                position[1] = 1 
                 //选择建筑的动效
                 //建筑升起的特效
-                var routerName = new THREE.Texture(SELECT_IMG); 
+                var routerName = new THREE.Texture(SELECT_IMG);
                 routerName.needsUpdate = true;
                 // var geometry = new THREE.CircleBufferGeometry(radius + 50, 32);
-                var geometry = new THREE.PlaneGeometry(radius * 2, radius * 2,1);
-                
-                let height = position[1].toString() * 2 +400
+                var geometry = new THREE.PlaneGeometry(radius * 2+5, radius * 2+5, 1);
+
+                let height = position[1].toString() * 2 + 400
                 let number = 7;
-                position[0] = position[0] + 900;
+                position[0] = position[0] ;
                 let plane_arr = [];
-                let initPlane = () =>{
+                let initPlane = () => {
                     var material = new THREE.MeshBasicMaterial({
                         // color: 0xffff00,
                         side: THREE.DoubleSide,
@@ -263,9 +262,9 @@ class City extends Base {
                     });
                     var circle = new THREE.Mesh(geometry, material);
                     circle.position.set(...position)
-                    circle.rotation.x = Math.PI / 2 
-                    circle.material.transparent = true; 
-                    state.scene.add(circle); 
+                    circle.rotation.x = Math.PI / 2
+                    circle.material.transparent = true;
+                    state.scene.add(circle);
                     return circle
                 }
                 let basePlane = initPlane()
@@ -276,30 +275,30 @@ class City extends Base {
                     if (number == 0) {
                         animation(basePlane)
                         return
-                    }     
+                    }
                     let plane = initPlane()
                     animation(plane)
-                    setTimeout(() => { 
+                    setTimeout(() => {
                         number--;
                         initNode()
                     }, 600)
                 }
                 initNode(plane_arr)
                 function animation(node) {
-                    let num = 0; 
+                    let num = 0;
                     let scale_num = 0;
-                    let scale_time = setInterval(()=>{
-                        let _n = 1-scale_num*0.02
-                        if(scale_num>5){
-                            clearInterval(scale_time) 
+                    let scale_time = setInterval(() => {
+                        let _n = 1 - scale_num * 0.02
+                        if (scale_num > 5) {
+                            clearInterval(scale_time)
                             _TIME()
                         }
                         node.scale.x = _n
                         node.scale.y = _n
                         node.scale.z = _n
                         scale_num++
-                    },20)
-                    const _TIME = () =>{
+                    }, 20)
+                    const _TIME = () => {
                         let time = setInterval(() => {
                             let _NUM = 1 - num / height
                             let _SCALE = _NUM * 0.1 + 0.9
@@ -316,12 +315,12 @@ class City extends Base {
                                     state.dispose(node)
                                 }, 100)
                             }
-                        }, 20) 
+                        }, 20)
                     }
-                    
+
                 }
             },
-            mouseup(event) {
+            mouseup(event) { 
                 var material = new THREE.MeshPhongMaterial({ color: 0x5599aa });
                 let mouse = new THREE.Vector2();
                 let x, y;
@@ -345,18 +344,11 @@ class City extends Base {
 
                     switch (event.button) {
                         case 0:
-                            //左键 
+                           /*  //左键 
                             if (obj.params_type == 'city') {
                                 let p = _this.cloneJSON(elem.point)
                                 document.getElementById("app").style.display = 'none'
-                                state.Vue.playEvenet(true)
-                               
-                                /*  state.cameraAnimated({
-                                     x: p.x,
-                                     y: p.y,
-                                     z: p.z
-                                 }) */
-
+                                state.Vue.playEvenet(true)  
                             } else {
                                 if (!state.auto_state) {
                                     state.autoControls()
@@ -366,7 +358,7 @@ class City extends Base {
                                 document.getElementById("app").style.display = 'block'
                                 // 
                             }
-                            break;
+                            break; */
                         case 2:
                             //右键
                             break;
@@ -450,12 +442,10 @@ class City extends Base {
                 this.addSatellite()
                 let json = _this.cloneJSON(cityPotion)
                 for (let i = 0; i < json.length; i++) {
-                    if (json[i].position) {
-                        state.addText(json[i].unit_name, json[i].position)
-                    }
+                    state.addText(json[i].name, json[i].position)
                 }
                 window.addEventListener("resize", state.onWindowResize)
-                
+
             },
             textAsCanvas(canvasText) {
                 var canvas = document.createElement('canvas');
@@ -473,12 +463,12 @@ class City extends Base {
                 return canvas;
             },
             addText(text, position, ys) {
-                //添加 house name
+                //添加 house name 
                 var routerName = new THREE.Texture(state.textAsCanvas(text));
                 routerName.needsUpdate = true;
                 var sprMat = new THREE.SpriteMaterial({ map: routerName, color: 0xffffff });
                 var spriteText = new THREE.Sprite(sprMat);
-                var sprScale = 75;
+                var sprScale = 60;
                 spriteText.scale.set(sprScale * text.length, sprScale, 1);
                 spriteText.position.set(position.x, position.y + 50, position.z);
                 spriteText.params_type = "title"
@@ -488,60 +478,78 @@ class City extends Base {
             addSatellite() {
                 var material = new THREE.MeshPhongMaterial({ color: 0x999999 });
                 var mtlLoader = new THREE.MTLLoader();
-             /*    mtlLoader.load('/assets/model/satellite.mtl', function (materials) {
-                    materials.preload(); */
-                    var objLoader = new THREE.OBJLoader();
-                    // objLoader.setMaterials(materials);
-                    objLoader.load('/assets/model/cloud.obj', function (mesh) {
-                        mesh.traverse(function (node) {
-                            if (node instanceof THREE.Mesh) {
-                                node.castShadow = true;
-                                node.receiveShadow = true;
-                                node.material = material
-                            }
-                        });
-                        mesh.position.set(state.SATELILITE_POSITION[0], state.SATELILITE_POSITION[1], state.SATELILITE_POSITION[2])
-                        state.scene.add(mesh)
-                        mesh.scale.x = 0.4
-                        mesh.scale.y = 0.4
-                        mesh.scale.z = 0.4
-                        setInterval(() => {
-                            mesh.rotation.y += 0.01
-                        }, 20)
+                /*    mtlLoader.load('/assets/model/satellite.mtl', function (materials) {
+                       materials.preload(); */
+                var objLoader = new THREE.OBJLoader();
+                // objLoader.setMaterials(materials);
+                objLoader.load('/assets/model/cloud.obj', function (mesh) {
+                    mesh.traverse(function (node) {
+                        if (node instanceof THREE.Mesh) {
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+                            node.material = material
+                        }
                     });
-             /*    }); */
+                    mesh.position.set(state.SATELILITE_POSITION[0], state.SATELILITE_POSITION[1], state.SATELILITE_POSITION[2])
+                    state.scene.add(mesh)
+                    mesh.scale.x = 0.4
+                    mesh.scale.y = 0.4
+                    mesh.scale.z = 0.4
+                    setInterval(() => {
+                        mesh.rotation.y += 0.01
+                    }, 20)
+                });
+                /*    }); */
 
             },
             createCity() {
+                let scale = 1
+                // var mtlLoader = new THREE.MTLLoader();
+                var objLoader = new THREE.OBJLoader();
+                /*  mtlLoader.load('/assets/model/city.mtl', function (materials) {
+                     materials.preload();
+               
+                     objLoader.setMaterials(materials); */
+                objLoader.load('/assets/model/mianshi.obj', function (mesh) {
+                    mesh.scale.x = scale;
+                    mesh.scale.y = scale;
+                    mesh.scale.z = scale;
+                    mesh.traverse(function (node) {
+                        if (node instanceof THREE.Mesh) {
+                            // // node.castShadow = true;
+                            node.receiveShadow = true; 
+                            
+                            let node_arr = node.name.split("-")
+                            let type = node_arr[2];//颜色type
 
-                var mtlLoader = new THREE.MTLLoader();
-                mtlLoader.load('/assets/model/city.mtl', function (materials) {
-                    materials.preload();
-                    var objLoader = new THREE.OBJLoader();
-                    objLoader.setMaterials(materials);
-                    objLoader.load('/assets/model/city.obj', function (mesh) {
-                        mesh.traverse(function (node) {
-                            if (node instanceof THREE.Mesh) {
-                                // // node.castShadow = true;
-                                node.receiveShadow = true;
-                                if (node.name === "city") {
-                                    node.material = obj_material
-
-                                } else {
-                                    node.material = obj_material1
-                                    node.params_type = "city"
-                                    state.all_building.push(node)
-                                }
-                                /*  
-                                 if (node.name == 'q1') {
-                                 } */
+                            switch (type) {
+                                case "1":
+                                node.material = obj_material1
+                                node.params_type = "city"
+                                // 
+                            state.all_building.push(node) 
+                                    break;
+                                case "2":
+                                node.material = obj_material
+                                   
+                                    break; 
+                                case "3":
+                                    node.material = obj_material2
+                                    break;
+                                case "4":
+                                    node.material = obj_material3
+                                    break;
                             }
-                        });
-                        mesh.position.set(900, 20, 0)
-                        mesh.params_type = "all_city"
-                        state.scene.add(mesh)
+                            /*  
+                             if (node.name == 'q1') {
+                             } */
+                        }
                     });
+                    mesh.position.set(0, 5, 0)
+                    mesh.params_type = "all_city"
+                    state.scene.add(mesh)
                 });
+                // });
             },
             path() {
 
@@ -590,15 +598,15 @@ class City extends Base {
                 //线条
                 //在新的一次 
                 if (index === 1) {
-                    state.building_step = []  
+                    state.building_step = []
                     let index = state.all_text.length
-                    while (index > state.all_text.length){
+                    while (index > state.all_text.length) {
                         state.dispose(state.all_text[index])
                         index--
                     }
-                    state.all_text=[]
+                    state.all_text = []
                 }
-                
+
                 //在数组中添加档当次 的连线
                 let building_the = [
                     src_node ? src_node.unit_id : 0,
@@ -632,17 +640,16 @@ class City extends Base {
                 let _IMG = this.addLineShowStep(reference, _src)
                 let n = 0;
                 let tim = setInterval(() => {
-                    n++;
-                    
+                    n++; 
                     if (n >= cinum) {
-                        //终点
+                        //终点 
                         if (dst_node) {
-                            //到达终点高亮
+                            //到达终点高亮 
                             state.shiny(dst_node)
                         }
                         let text = state.addStep([_center[0] + _LINE, _center[1], _center[2]], index, reference)
                         state.all_text.push(text)
-                        state.dispose(_IMG)  
+                        state.dispose(_IMG)
                         clearInterval(tim)
                     } else {
                         line.advance(vector[n])
@@ -659,7 +666,7 @@ class City extends Base {
                     state.dispose(_IMG) 
                 }) */
             },
-            addStep(position, index, reference) {  
+            addStep(position, index, reference) {
                 //连线展示开始图标
                 let canvas = document.createElement('canvas');
                 let RECT_SIZE = 256; //大小
@@ -683,7 +690,7 @@ class City extends Base {
                 let sprScale = 80;
                 spriteText.scale.set(sprScale, sprScale, 1);
                 spriteText.position.set(position[0], position[1] + 70, position[2]);
-                spriteText.params_type = "step" 
+                spriteText.params_type = "step"
                 spriteText.params_num = index
                 state.scene.add(spriteText);
                 return spriteText
@@ -820,12 +827,13 @@ class City extends Base {
                 }
             },
             nameGetNode(name) {
-                //根据名字找到当前 建筑
-                let nodes = state.scene.children;
+                //根据名字找到当前 建筑 
                 let index = 0;
                 let buildings = state.all_building;
+                console.log( buildings[index].name)
+                console.log(name)
                 while (index < buildings.length) {
-                    let names = buildings[index].name.split("-")
+                    let names = buildings[index].name.split("-") 
                     if (names[0] == name) {
                         return buildings[index]
                     }
@@ -835,16 +843,17 @@ class City extends Base {
             },
             shiny(node) {
                 //高亮建筑 
-                var material = new THREE.MeshPhongMaterial({ color: 0xff42000 });
-                let _node = state.nameGetNode(node.unit_name)
+                var material = new THREE.MeshPhongMaterial({ color: 0xff42000 }); 
+                let _node = state.nameGetNode(node.name) 
                 if (_node) {
-                    _node.material = obj_material2
-                    let node = _node.geometry;
+                    _node.material = obj_material3
+                    let node = _node.geometry; 
+                    console.log(node)
                     let sphere = node.boundingSphere
                     let position = state.transformPostion(sphere.center)
                     state.buildingAnimation(position, sphere.radius)
                 }
-                
+
             }
 
         }
@@ -857,7 +866,6 @@ class City extends Base {
         //获取网段 
         let src_p, dst_p;
         let src_node, dst_node;
-
         if (item.src == "0.0.0.0") {
             src_p = this.state.SATELILITE_POSITION
         } else {
@@ -866,20 +874,27 @@ class City extends Base {
             src_node = this.getNode(src)
             src_p = this.state.transformPostion(src_node.position)
         }
+        item.dst = `192.${parseInt(Math.random()*200)}.0.0`
+        console.log(this._cit_json)
         if (item.dst == "0.0.0.0") {
             dst_p = this.state.SATELILITE_POSITION
         } else {
-            let dst = this.ip_get_network(item.dst)
+            console.log(item.dst)
+            let dst = this.ip_get_network(item.dst) 
             dst_node = this.getNode(dst)
+        
             dst_p = this.state.transformPostion(dst_node.position)
         }
-        // src_p = Math.random() < 0.5 ? src_p : this.state.SATELILITE_POSITION 
-
+        // src_p = Math.random() < 0.5 ? src_p : this.state.SATELILITE_POSITION
+        console.log(src_p)   
         if (dst_p.toString() == src_p.toString()) {
+            if (item.src == "0.0.0.0") {
+                return
+            }
             //添加属性
             item.attack_type = 1;//当前是统一建筑
             item.sort = index + 1;//当前步骤
-            item.dst_p = dst_p;//当前步骤 
+            item.dst_p = dst_p;//当前步骤  
             item.unit_id = dst_node.unit_id;//当前步骤  
             this.state.initBrandGo([{
                 sort: item.sort,
@@ -914,13 +929,13 @@ class City extends Base {
         return arr
     }
     ip_get_network(str) {
-        return str.split("/")[0].split(".")[2]
+        return str.split("/")[0].split(".")[1]
     }
     claerHistory() {
 
     }
     getNode(net) {
-        let index = 0;
+        let index = 0; 
         while (index < this._cit_json.length) {
             let unit = this._cit_json[index]
             if (unit.subnet.indexOf(net) !== -1) {

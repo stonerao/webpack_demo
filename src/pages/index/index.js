@@ -49,7 +49,7 @@ let VM = new Vue({
             assets_interval: null,
             assets_watch: 0,
             TimeOut: null,
-            host: "172.18.0.23",
+            host: "cszz.eelantech.com:2880",
             unit_animation_info: {
                 show: false,
                 time: "",
@@ -58,7 +58,8 @@ let VM = new Vue({
             },
             unit_animation_time: null,
             ZAN_PLAY_TIME: null,
-            folding: false
+            folding: false,
+            units:[]
         }
     },
     watch: {
@@ -73,7 +74,7 @@ let VM = new Vue({
             document.body.appendChild(WEBGL.getWebGL2ErrorMessage());
         }
         let host = window.location.host
-        this.host = host.indexOf("127.0.0.1") || host.indexOf("localhost") ? "172.18.0.23" : host;
+        this.host = host.indexOf("127.0.0.1") || host.indexOf("localhost") ? "cszz.eelantech.com:2880" : host;
         this.unitId = query.unit || "all";
         this._city = new City({
             width: dom.offsetWidth,
@@ -82,6 +83,7 @@ let VM = new Vue({
             stats: false,
             Vue: this
         })
+        this.getUnits()
         this.microStatistics()
         setTimeout(() => {
             this.load()
@@ -205,12 +207,13 @@ let VM = new Vue({
                 this.assets_index++
             }, 6000)
         },
+
         microStatistics(func) {
             if (query.city == undefined) {
                 console.warn("请携带参数")
                 return
             }
-            this.statsWs = new WebSocket(`ws://172.18.0.23/${query.city}/api/websocket/microStatistics`);
+            this.statsWs = new WebSocket(`ws://${this.host}/${query.city}/api/websocket/microStatistics`);
             this.statsWs.onopen = () => {
                 this.statsWs.send(JSON.stringify({ "unitId": this.unitId.toString() }))
                 typeof func == 'function' ? func() : '';
@@ -308,7 +311,7 @@ let VM = new Vue({
             //开始运行  
             if (this.select_index >= this.threat_items.length) {
                 this.select_index = 0;
-            }
+            } 
             if (this.threat_items.length == 0) return;
             this.title_class = ""
             let item = this.show_items = this.threat_items[this.select_index];
@@ -326,10 +329,6 @@ let VM = new Vue({
             }
             clearTimeout(this.TimeOut)
             clearTimeout(this.ZAN_PLAY_TIME)
-
-
-
-
             if (this.ws) {
                 if (query.graph == "1506" && item._id) {
                     this.ws.send(JSON.stringify({
@@ -340,16 +339,16 @@ let VM = new Vue({
             let dom = document.querySelector("#infos");
             let domContent = document.querySelector("#list-content");
             const startStep = () => {
-                //如果满足 取消定时器
+                //如果满足 取消定时器 
                 if (index >= item.list.length) {
                     clearInterval(this.interval)
                     if (state == 100) {
                         //暂停10秒钟
                         let PLAY_TIME = 10000
                         this.playEvenet(true)
-                       /*  this.ZAN_PLAY_TIME = setTimeout(() => {
-                            this.playEvenet(false)
-                        }, PLAY_TIME) */
+                        /*  this.ZAN_PLAY_TIME = setTimeout(() => {
+                             this.playEvenet(false)
+                         }, PLAY_TIME) */
                         return
                     }
                     this.TimeOut = setTimeout(() => {
@@ -361,7 +360,7 @@ let VM = new Vue({
                     return
                 }
                 item.step.push(item.list[index])
-                //给THREE 传递需要展示信息
+                //给THREE 传递需要展示信息 
                 this._city.attack_step(item.list, index)
 
 
@@ -409,6 +408,27 @@ let VM = new Vue({
                 this._city.state.quitAutoControls()
             }
             this.is_play = state
+        },
+        getUnits() {
+            axios(`/${query.city}/api/UnitManagement/query`,{
+                params:{
+                    skip:0,
+                amount:100
+                }
+            }).then(res=>{
+                this.units = res.list 
+                this._city._cit_json.forEach(elem=>{
+                    this.units.forEach(unit=>{
+                        if(unit.unit_name == elem.name){
+                            let target = unit.target.split(",").map(x=>x.split("/")[0]).map(x=>x.split(".")[1]) 
+                            elem['unit_id'] = unit.unit_id
+                            elem['target'] = unit.target
+                            elem['subnet'] = target 
+                            elem['sensor_id'] = unit.sensor_id 
+                        }
+                    })
+                })
+            })
         },
         getThreatList(func) {
             if (query.city == undefined) {
