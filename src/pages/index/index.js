@@ -346,9 +346,7 @@ let VM = new Vue({
                         //暂停10秒钟
                         let PLAY_TIME = 10000
                         this.playEvenet(true)
-                        /*  this.ZAN_PLAY_TIME = setTimeout(() => {
-                             this.playEvenet(false)
-                         }, PLAY_TIME) */
+                         
                         return
                     }
                     this.TimeOut = setTimeout(() => {
