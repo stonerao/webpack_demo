@@ -190,8 +190,9 @@ let VM = new Vue({
         inter_statis() {
             clearInterval(this.assets_interval)
             let set_data = (data) => {
-                this.assets_class = "animated flipInX"
-                this.assets_list = data;
+                this.assets_class = "animated flipInX" 
+                data.asset = data.asset.filter((d,i)=>i<5)
+                this.assets_list = data 
                 setTimeout(() => {
                     this.assets_class = ""
                 }, 2000)
@@ -222,7 +223,7 @@ let VM = new Vue({
             this.statsWs.onmessage = e => {
                 if (e.data === "Connect micro situation successful") return;
                 let data = JSON.parse(e.data);
-                this.unit_list = data.statistics;
+                this.unit_list = data.statistics.filter((d,i)=>i<5);
                 this.assets_watch = this.unit_list.length
 
                 this.unit_class = "animated flipInX"

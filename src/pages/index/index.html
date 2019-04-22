@@ -207,9 +207,9 @@
 						<div>
 							受威胁数
 						</div>
-						<!-- <div>
-							漏洞数
-						</div> -->
+						 <div>
+							 漏洞数
+						</div>  
 					</li>
 					<li :class="unit_class+` delay-${index+1}`" v-for="(item,index) in unit_list" :key="index">
 						<div style="width:180px;">
@@ -217,7 +217,7 @@
 							<span>{{item.unit}}</span>
 						</div>
 						<div>{{item.threat}}</div>
-					<!-- 	<div>{{item.vulnerability}}</div> -->
+				 	<div>{{item.vulnerability}}</div> 
 					</li>
 					<li v-if="unit_list.length==0" style="text-align:center;display:block">
 						暂无数据
@@ -243,9 +243,9 @@
 						<div>
 							受威胁数
 						</div>
-						<!-- <div>
-							漏洞数
-						</div> -->
+					  <div>
+						 漏洞数
+						</div> 
 					</li>
 					<li v-if="!assets_list.asset" style="text-align:center;display:block">
 						暂无数据
@@ -260,7 +260,7 @@
 							<span>单位</span>
 						</div> -->
 						<div>{{item.threat}}</div>
-						<!-- <div>{{item.vulnerability}}</div> -->
+						  <div>{{item.vulnerability}}</div> 
 					</li>
 				</ul>
 			</div>
