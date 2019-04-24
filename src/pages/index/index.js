@@ -3,6 +3,20 @@ import City from './city';
 import Vue from 'vue/dist/vue.js'
 import axios from '../../utils/axios'
 import PerfectScrollbar from 'perfect-scrollbar'
+axios.interceptors.response.use(res => { 
+
+    return res
+}, (err) => {
+    if (err.response.status === 401) {
+        let data = err.response.data
+        if (data.ret_code == -3) {
+            let query = window.location.href.split("?")[1];
+            window.location.href = '/mnu/admin/#/login?' + query
+        }
+
+    }
+
+})
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 let dom = document.getElementById("main")
 let query = GetRequest();
@@ -59,7 +73,7 @@ let VM = new Vue({
             unit_animation_time: null,
             ZAN_PLAY_TIME: null,
             folding: false,
-            units:[]
+            units: []
         }
     },
     watch: {
@@ -190,9 +204,9 @@ let VM = new Vue({
         inter_statis() {
             clearInterval(this.assets_interval)
             let set_data = (data) => {
-                this.assets_class = "animated flipInX" 
-                data.asset = data.asset.filter((d,i)=>i<5)
-                this.assets_list = data 
+                this.assets_class = "animated flipInX"
+                data.asset = data.asset.filter((d, i) => i < 5)
+                this.assets_list = data
                 setTimeout(() => {
                     this.assets_class = ""
                 }, 2000)
@@ -223,7 +237,7 @@ let VM = new Vue({
             this.statsWs.onmessage = e => {
                 if (e.data === "Connect micro situation successful") return;
                 let data = JSON.parse(e.data);
-                this.unit_list = data.statistics.filter((d,i)=>i<5);
+                this.unit_list = data.statistics.filter((d, i) => i < 5);
                 this.assets_watch = this.unit_list.length
 
                 this.unit_class = "animated flipInX"
@@ -312,7 +326,7 @@ let VM = new Vue({
             //开始运行  
             if (this.select_index >= this.threat_items.length) {
                 this.select_index = 0;
-            } 
+            }
             if (this.threat_items.length == 0) return;
             this.title_class = ""
             let item = this.show_items = this.threat_items[this.select_index];
@@ -347,7 +361,7 @@ let VM = new Vue({
                         //暂停10秒钟
                         let PLAY_TIME = 10000
                         this.playEvenet(true)
-                         
+
                         return
                     }
                     this.TimeOut = setTimeout(() => {
@@ -409,21 +423,22 @@ let VM = new Vue({
             this.is_play = state
         },
         getUnits() {
-            axios(`/${query.city}/api/UnitManagement/query`,{
-                params:{
-                    skip:0,
-                amount:100
+            axios(`/${query.city}/api/UnitManagement/query`, {
+                params: {
+                    skip: 0,
+                    amount: 100
                 }
-            }).then(res=>{
-                this.units = res.list 
-                this._city._cit_json.forEach(elem=>{
-                    this.units.forEach(unit=>{
-                        if(unit.unit_name == elem.name){
-                            let target = unit.target.split(",").map(x=>x.split("/")[0]).map(x=>x.split(".")[1]) 
+            }).then(res => {
+                console.log(res)
+                this.units = res.list
+                this._city._cit_json.forEach(elem => {
+                    this.units.forEach(unit => {
+                        if (unit.unit_name == elem.name) {
+                            let target = unit.target.split(",").map(x => x.split("/")[0]).map(x => x.split(".")[1])
                             elem['unit_id'] = unit.unit_id
                             elem['target'] = unit.target
-                            elem['subnet'] = target 
-                            elem['sensor_id'] = unit.sensor_id 
+                            elem['subnet'] = target
+                            elem['sensor_id'] = unit.sensor_id
                         }
                     })
                 })
