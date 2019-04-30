@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>网络安全威胁回放</title>
+    <script type="text/javascript" src="./assets/js/three.min.js"></script>
+    <script type="text/javascript" src="./assets/js/WebGL.js"></script>
+    <script type="text/javascript" src="./assets/js/OrbitControls.js"></script>
+    <script type="text/javascript" src="./assets/js/ColladaLoader.js"></script>
+    <script type="text/javascript" src="./assets/js/MTLLoader.js"></script>
+    <script type="text/javascript" src="./assets/js/OBJLoader.js"></script>
+    <script type="text/javascript" src="./assets/js/Stats.js"></script>
+    <script type="text/javascript" src="./assets/js/tween.js"></script>
+    <script type="text/javascript" src="./assets/js/THREE.MeshLine.js"></script>
+    <link rel="stylesheet" href="./assets/styles/reset.css">
+    <link rel="stylesheet" href="./assets/styles/animate.css">
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        #app {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        #stats {
+            position: absolute;
+            top: 0;
+            width: 100px;
+            height: 100px;
+            left: 0;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <canvas id="canvas"></canvas>
+    </div>
+</body>
+
+</html>

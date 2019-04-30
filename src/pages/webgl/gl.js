@@ -104,8 +104,7 @@ function GL() {
         return Math.random() < 0.5 ? 0 - number : number
     }
     _prototype.initTestBox = () => {
-        //测试10W以上盒子性能
-
+        //测试10W以上盒子性能 
         var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
         function addCube() {
             var geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -276,10 +275,10 @@ function GL() {
         this.stats()
         this.initControls()
         this.city()
-        // this.initTestBox()
+        this.initTestBox()
         // 
         // this.testCircle()
-        this.createWay()
+        // this.createWay()
         //
         this.animationFrame();
     }
