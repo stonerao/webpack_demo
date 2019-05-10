@@ -452,8 +452,7 @@ class City extends Base {
                 var canvas = document.createElement('canvas');
                 canvas.width = canvasText.length * 256;
                 canvas.height = 256;
-                var context = canvas.getContext('2d');
-
+                var context = canvas.getContext('2d'); 
                 context.font = 'bold 180px Arial';
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
