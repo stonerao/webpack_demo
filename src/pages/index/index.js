@@ -3,7 +3,7 @@ import City from './city';
 import Vue from 'vue/dist/vue.js'
 import axios from '../../utils/axios'
 import PerfectScrollbar from 'perfect-scrollbar'
-axios.interceptors.response.use(res => { 
+axios.interceptors.response.use(res => {
 
     return res
 }, (err) => {
@@ -63,7 +63,7 @@ let VM = new Vue({
             assets_interval: null,
             assets_watch: 0,
             TimeOut: null,
-            host: "cszz.eelantech.com:2880",
+            host: window.location.host,
             unit_animation_info: {
                 show: false,
                 time: "",
@@ -88,7 +88,7 @@ let VM = new Vue({
             document.body.appendChild(WEBGL.getWebGL2ErrorMessage());
         }
         let host = window.location.host
-        this.host = host.indexOf("127.0.0.1") || host.indexOf("localhost") ? "cszz.eelantech.com:2880" : host;
+        this.host = window.location.host
         this.unitId = query.unit || "all";
         this._city = new City({
             width: dom.offsetWidth,
